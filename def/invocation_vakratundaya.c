@@ -26,7 +26,7 @@ void configure() {
 	set_invocation_ability_determinants(([
 		Condition_Skill_Composite           : True,
 		Skill_Conjuration                   : 0.10,
-		Skill_Theurgy                         : 0.10,
+		Skill_Theurgy                       : 0.10,
 		Skill_Abjuration                    : 0.10,
 		Skill_Invocation                    : 0.70,
 		([
@@ -55,6 +55,18 @@ void configure() {
 			return Error(({
 				"which beacon?",
 			}));
+		int sonority = query_invocation_sonority(who);
+        int since = time() - who->query_info("Ganesha_Conceptual_Navigation_Time");
+        int allowed = scale_conversion(sonority, 0, 100, Time_Hour / 2, Time_Minute);
+        allowed += Time_Minute * 5;
+        allowed -= min(Time_Minute * 5, round(diminishing_returns(Metric_Retrieve("karma phala", who), 1)));
+        if(since < allowed) {
+            return Error(({
+                who, ({ "cannot", who }), "invoke Ganesha for translocation so often;", who, ({ "estimate", who }), "that",
+                "at", ({ 'r', who, "current level of ability and karma phala" }), ",", ({ 'p', who }), ({ "must", who }), "wait at least",
+                "another", Daemon_Time->describe_time(allowed - since) 
+            }));
+        }
 		object link = who->query_affiliation_link(project_control());
 		int max = link->travelers_query_divine_waypoints_count();
 		if(which > max)
@@ -68,7 +80,7 @@ void configure() {
 				who, ({ "have", who }), "yet to mark a location for that point",
 			}));
 		object here = environment(who);
-		status field = any(deep_inventory(here), (: $1->is_ganesha_interdiction_field() && sizeof($1->ganesha_interdiction_field_query_realms()) && member($1->ganesha_interdiction_query_realms(), "NT") != Null :));
+		status field = any(deep_inventory(here), (: $1->is_ganesha_interdiction_field() && sizeof($1->ganesha_interdiction_field_query_realms()) && member($1->ganesha_interdiction_field_query_realms(), "NT") != Null :));
 		if(field)
 		    return Error(({
 		        "Ganesha will not intervene to remove his own interdiction."
@@ -109,12 +121,12 @@ void configure() {
 		if(query_any_realm("NT", env))
 		    realm_mod_1 = env->add_realm_modifier(([
 		        Modifier_Index      : "NT",
-		        Modifier_Amount     : -1000,
+		        Modifier_Amount     : -10000,
 		    ]));
 		if(query_any_realm("NT", where))
 		    realm_mod_2 = where->add_realm_modifier(([
 		        Modifier_Index      : "NT",
-		        Modifier_Amount     : -1000,
+		        Modifier_Amount     : -10000,
 		    ]));
 		env->message(([
 			Message_Content         : ({
@@ -138,6 +150,7 @@ void configure() {
 			Message_Exclude         : convoy,
 			Message_Senses          : Message_Sense_Visual | Message_Sense_Astral,
 		]));
+        who->set_info("Ganesha_Conceptual_Navigation_Time", time());
 		if(realm_mod_1)
 		    env->remove_realm_modifier(&realm_mod_1);
 		if(realm_mod_2)

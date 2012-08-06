@@ -102,10 +102,11 @@ void configure() {
 		int duration = scale_conversion(sonority, 0, 100, Time_Hour, Time_Day) * sizeof(blades);
 		Ganesha_Add_Karma_Phala(who, sizeof(blades));
 		blades->remove();
+		int amount = round(diminishing_returns(Ganesha_Query_Karma_Phala(who), 1) + 150);
 		who->add_attribute_modifier(([
 		    Modifier_Index          : Basic_Attributes,
-		    Modifier_Amount         : 150,
-		    Modifier_Bound          : 350,
+		    Modifier_Amount         : amount,
+		    Modifier_Bound          : amount + 200,
 		    Modifier_Flags          : Modifier_Flag_Mergeable,
 		    Modifier_Duration       : duration,
 		    Modifier_Add_Display    : ([
