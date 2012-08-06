@@ -652,3 +652,4 @@ string array challenge_overcome(object challenge) {
 mixed retrieve_help(string text, object who) {
 	return funcall(help_lookup[text], who, text);
 }
+
