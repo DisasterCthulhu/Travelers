@@ -80,6 +80,10 @@ void configure() {
 			return Error(({
 				"one must be more precise in one's communication of a desired form"
 			}));
+		if(def->query_weapon_type_rarity() == Rarity_Special)
+			return Error(({
+			    "one must choose a more generic and less unique tool"
+			}));
 		int number_of_hands_required = Weapon_Size(def->query_weapon_type_size())->query_weapon_size_hands_required(who);
 		int number_of_hands = sizeof(who->existing_limbs(Limb_Type_Hand));
 		if(!number_of_hands_required)

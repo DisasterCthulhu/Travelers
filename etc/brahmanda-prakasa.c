@@ -232,9 +232,10 @@ void brahmanda_prakasa_update_passing_effect(object old_chakra, object new_chakr
 		pre_message = ({
 			"bubbles of energy centered around", ({ 's', who, old_chakra }), "disperse, and",
 		});
-	Element_Record_Message(who, rec, pre_message, 0, ([
-		Message_Senses      : Message_Sense_Visual | Message_Sense_Astral,
-	]));
+	unless(old_chakra == new_chakra && (old_chakra || new_chakra))
+	    Element_Record_Message(who, rec, pre_message, 0, ([
+		    Message_Senses      : Message_Sense_Visual | Message_Sense_Astral,
+	    ]));
 }
 
 void brahmanda_prakasa_synchronize_with_chakra() {
@@ -674,7 +675,7 @@ void configure() {
         Message_Senses                          : Message_Sense_Cognitive | Message_Sense_Spiritual,
         Message_Color                           : "status: risk",
     ]));
-    personal_enchantment_set_remove_display(([
+    personal_enchantment_set_remove_message(([
         Message_Content                         : ({
             #'brahmanda_prakasa_dweomer_colored_bubbles, "flow outward from", ({ 's', "%o", "%t" }), "as", ({ 'p', "%t" }),
             ({ "dissipate", "%t" }), "into the surrounding", Description(Description_Type_Ambient_Medium_Colored_Name)

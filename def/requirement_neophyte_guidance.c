@@ -40,7 +40,7 @@ void configure() {
 	set_requirement_initialize_description("guiding a neophyte in your capacity as a Warden");
 	set_requirement_overcome_description("provided enough guidance");
 	set_requirement_initialize_process((:
-		int client_exp_needed = 800;
+		int client_exp_needed = 100;
 		$1->set_info("Client_Experience_Required", client_exp_needed);
 		$1->set_info("Client_Experience_Gained", 0);
 		return;
