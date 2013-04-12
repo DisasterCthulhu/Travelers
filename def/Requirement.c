@@ -204,6 +204,9 @@ void requirement_yield(object obj) {
 }
 
 void requirement_fail(object obj) {
+	object who = obj->ganesha_challenge_query_owner();
+	if(requirement_overcome)
+		funcall(requirement_overcome, obj);
 }
 
 void set_requirement_eligibility_condition(mixed cond) {
