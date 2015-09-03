@@ -1,15 +1,15 @@
-#include <Travelers.h>
-#include <daemon.h>
-#include <Nexus.h>
 #include <Caves_of_Sionell.h>
-#include <Vanishing_Tower.h>
-#include <Syllyac.h>
-#include <Crystal_Cave.h>
-#include <Terrace.h>
 #include <Corpore_Scyros.h>
+#include <Crystal_Cave.h>
 #include <Liathyr.h>
+#include <Nexus.h>
 #include <Og.h>
+#include <Syllyac.h>
 #include <Temple_of_Ganesha.h>
+#include <Terrace.h>
+#include <Travelers.h>
+#include <Vanishing_Tower.h>
+#include <daemon.h>
 #include <locations.h>
 
 inherit Travelers_Definition("Requirement");
@@ -25,11 +25,12 @@ void configure() {
 	set_requirement_name("pilgrimage");
 	set_requirement_rarity(Rarity_Exotic);
 	set_requirement_value(Travelers_Requirement_Value_Very_High);
+	set_requirement_suspendable(True);
 	set_requirement_initialize_description("making pilgrimage to the temple of Ganesha");
 	set_requirement_overcome_description("successfully completed your pilgrimage");
 	set_requirement_eligibility_condition(([
-		Condition_Type_Code                     : Condition_Type_Level,
-		Condition_Value                         : 25,
+		Condition_Type_Code                                                     : Condition_Type_Level,
+		Condition_Value                                                         : 25,
 	]));
 	set_requirement_initialize_process((:
 		object who = $1->ganesha_challenge_query_owner();
@@ -39,7 +40,7 @@ void configure() {
 			Nexus_Room("statue")                                                : Rarity_Very_Common,
 			Caves_of_Sionell_Room("map_0_3_-1")                                 : Rarity_Common,
 			Syllyac_Room(maze_room)                                             : Rarity_Common,
-			Og_Room("intersection5")                                            : Rarity_Unusual,
+			Og_Room("map_0_0_0")                                                : Rarity_Unusual,
 			Terrace_Room("larder")                                              : Rarity_Unusual,
 			Vanishing_Tower_Room("ante")                                        : Rarity_Very_Unusual,
 			Corpore_Scyros_Room("map_0_0_0")                                    : Rarity_Very_Unusual,
@@ -61,22 +62,16 @@ void configure() {
 		field->set_info(query_requirement_modifier_tag(), True);
 		Temple_of_Ganesha_Daemon("control")->temple_of_ganesha_move_temple();
 		int array coords;
-		string quadrant = 0;
-		catch(coords = Temple_of_Ganesha_Daemon("control")->temple_of_ganesha_query_entrance_location()->query_global_coordinates());
-		if(coords) {
-		    quadrant = "";
-		    if(coords[1] < 0)
-		        quadrant = "south";
-		    else
-		        quadrant = "north";
-		    if(coords[0] < 0)
-		        quadrant += "west";
-		    else
-		        quadrant += "east";
-		}
-		object tyrice = Temple_of_Ganesha_NPC("tyrice")->load();
+		string where = Temple_of_Ganesha_Daemon("control")->temple_of_ganesha_query_location_description();
+		object tyrice = find_object(Temple_of_Ganesha_NPC("tyrice"));
+		// above used to be Temple_of_Ganesha_NPC("tyrice")->load(True) which is always false
+		// when Tyrice is in temple, and only returned an object if he is not currently loaded in the temple,
+		// meaning he rarely if ever gave his new regional location, if this
+		// was intentional, I apologize, if not, he will now only give location if not dead. - xekrin,
 		if(tyrice)
-			tyrice->init_command("traveler Let it be known that the temple of Ganesha is moving " + (quadrant ? "to the " + quadrant + " region of the world" : "") + ", so that " + who->query_full_name() + " might complete a pilgrimage.");
+			tyrice->init_command("traveler Let it be known that the temple of Ganesha is moving " +
+				(where ? "to the " + where + " region of the world" : "") + ", so that " +
+				who->query_full_name() + " might complete a pilgrimage.");
 		return;
 	:));
 	set_requirement_overcome_process((:

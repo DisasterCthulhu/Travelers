@@ -79,7 +79,7 @@ void configure() {
 			}));
 		string array types;
 		if(Is_Damage_Combo(no_article))
-			types = Damage_Combo(no_article)->query_damage_combo_types();
+			types = map(Damage_Combo(no_article)->query_damage_combo_types(), Damage_Type_Name_Lookup);
 		else if(Is_Damage_Type(no_article))
 			types = ({ no_article });
 		Process_Set(dxr, Process_Target, katakacha);

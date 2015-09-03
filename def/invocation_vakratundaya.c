@@ -89,6 +89,14 @@ void configure() {
 		    return Error(({
 		        "Ganesha will not remove his transplanar warding from his own temple."
 		    }));
+        if(query_any_realm("NT", who))
+            return Error(({
+                who, ({ "sense", who }), "some force present locally working to prevent teleportation of any kind",
+            }));
+        if(query_any_realm("NT", where))
+            return Error(({
+                who, ({ "sense", who }), "some force at", ({ 'r', who, "desired destination" }), "working to prevent teleportation of any kind",
+            }));
 		Process_Set(dxr, Process_Target, where);
 		return True;
 	:));
@@ -143,19 +151,49 @@ void configure() {
 		    Message_Senses          : Message_Sense_Kinesthetic | Message_Sense_Spiritual,
 		]));
 		convoy->move(where);
-		where->message(([
-			Message_Content         : ({
-			    ({ 'j', convoy }), ({ "appear", convoy }), "in", 'a', self_color("dazzling golden", "burst of", "motes of light")
-			}),
-			Message_Exclude         : convoy,
-			Message_Senses          : Message_Sense_Visual | Message_Sense_Astral,
-		]));
+		mixed envs = 0;
+		foreach(object obj : convoy) {
+			if(!obj)
+				continue;
+			object env = obj->query_parent_object();
+			if(!env)
+				continue;
+			if(arrayp(envs)) {
+				if(member(envs, env) == Null)
+					array_push_object(envs, env);
+			} else if(envs) {
+				if(env != envs)
+					envs = ({ envs, env });
+			} else {
+				envs = env;
+			}
+		}
+		if(arrayp(envs)) {
+			foreach(object env : envs) {
+				object array sub = filter(convoy, (: $1 && $1->query_parent_object() == $2 :), env);
+				env->message(([
+					Message_Content     : ({
+						({ 'j', sub }), ({ "appear", sub }), "in", 'a', self_color("dazzling golden", "burst of", "motes of light"),
+					}),
+					Message_Exclude     : convoy,
+					Message_Senses      : Message_Sense_Visual | Message_Sense_Astral,
+				]));
+			}
+		} else if(envs) {
+			envs->message(([
+				Message_Content         : ({
+					({ 'j', convoy }), ({ "appear", convoy }), "in", 'a', self_color("dazzling golden", "burst of", "motes of light"),
+				}),
+				Message_Exclude         : convoy,
+				Message_Senses          : Message_Sense_Visual | Message_Sense_Astral,
+			]));
+		}
         who->set_info("Ganesha_Conceptual_Navigation_Time", time());
 		if(realm_mod_1)
 		    env->remove_realm_modifier(&realm_mod_1);
-		if(realm_mod_2)
+		if(realm_mod_2 && where)
 		    where->remove_realm_modifier(&realm_mod_2);
-        who->describe_room(where, who->query_depictions());
+        who->describe_room(who->query_parent_object(), who->query_depictions());
 		return;
 	:));
 }

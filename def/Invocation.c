@@ -4,6 +4,8 @@
 #include <speech.h>
 #include <Travelers.h>
 
+nosave private mapping relevant_skills;
+nosave private mixed relevant_skills_total_weight;
 private closure invocation_begin_can_call;
 private closure invocation_continue_can_call;
 private closure invocation_execute_do_call;
@@ -21,10 +23,10 @@ private string argument;
 private string argument_description;
 private string bestowal;
 private string description;
-private string summary;
 private string key;
 private string lower_case_key;
 private string name;
+private string summary;
 
 inherit "/std/definition";
 
@@ -109,7 +111,7 @@ void set_invocation_cost(mixed val) {
 	foreach(mixed array energy : val) {
 		descriptor new_cost = Energy_Cost(energy);
 		Energy_Cost_Set(new_cost, Energy_Cost_Purpose, ({
-			({ "perform", 0 }), "the invocation", capitalize_words(query_invocation_name(), True)
+			"perform the invocation", capitalize_words(query_invocation_name(), True)
 		}));
 		energy_cost += ({ new_cost });
 	}
@@ -151,6 +153,22 @@ descriptor query_invocation_ability_determinants() {
 	]));
 }
 
+
+mapping query_invocation_relevant_skills() {
+	return relevant_skills ||= Condition_Relevant_Skills(query_invocation_ability_determinants()) || ([]);
+}
+
+private mixed invocation_determine_relevant_skills_total_weight() {
+	mixed out = 0;
+	foreach(int skill, float weight : query_invocation_relevant_skills())
+		out += weight;
+	return out;
+}
+
+mixed query_invocation_relevant_skills_total_weight() {
+	return relevant_skills_total_weight ||= invocation_determine_relevant_skills_total_weight();
+}
+
 float query_invocation_ability(object who) {
 	float out = Condition_Evaluate(query_invocation_ability_determinants(), who, 0);
 	if(query_invocation_ability_maximum())
@@ -162,7 +180,7 @@ int query_invocation_sonority(object who) {
 	int max = query_invocation_ability_maximum();
 	int min = query_invocation_ability_minimum();
 	if(!max)
-		return(100);
+		return 100;
 	return scale_conversion(round(query_invocation_ability(who)), min, max, 0, 100);
 }
 
@@ -269,11 +287,11 @@ status invocation_complete_do_call(descriptor dxr) {
 	float total_cost = 0.0;
 	foreach(descriptor ec : query_invocation_cost())
 		total_cost += Energy_Cost_Query(ec, Energy_Cost_Amount) * Energy(Energy_Cost_Query(ec, Energy_Cost_Type))->query_energy_potency();
-	mapping skills = Condition_Relevant_Skills(query_invocation_ability_determinants());
-	float total_prop = accumulate(m_values(skills));
+	mapping skills = query_invocation_relevant_skills();
+	float total_prop = query_invocation_relevant_skills_total_weight();
 	foreach(int skill, float prop : skills)
 		who->add_skill_exp(skill, total_cost * prop / total_prop);
-	string log_string = ctime() + ": " + printable(who) + " performed invocation " + query_invocation_name() + " with " + printable(query_invocation_sonority(who)) + "% sonority";
+	string log_string = "[" + ctime() + "] " + printable(who) + " performed invocation " + query_invocation_name() + " with " + printable(query_invocation_sonority(who)) + "% sonority";
 	string extra = Process_Query_Info(dxr, "Travelers_Invocation_Log_Data");
 	if(extra)
 		log_string += " with the arguments " + extra;
@@ -285,7 +303,7 @@ status invocation_begin_do_call(descriptor dxr) {
 	object who = Process_Query(dxr, Process_Actor);
 	descriptor bypass_cond = query_invocation_cost_bypass_condition();
 	unless(bypass_cond && Condition_Apply(bypass_cond, who, 0))
-		Energy_Cost_Assert_List(query_invocation_cost(), who);
+		Energy_Costs_Assert(query_invocation_cost(), who);
 	return True;
 }
 
@@ -442,7 +460,7 @@ status perform_invocation(mapping args) {
 		Process_Continue_Fail_Call          : #'invocation_continue_fail_call,
 		Process_Complete_Do_Call            : #'invocation_complete_do_call,
 		Process_Interrupts                  : Process_Interrupts_All_Except(Process_Interrupt_Blindness),
-		Process_Interrupts_Resistable       : Process_Interrupt_Damage | Process_Interrupt_Combat | Process_Interrupt_Pain | Process_Interrupt_Pleasure,
+		Process_Interrupts_Resistable       : Process_Interrupt_Combat | Process_Resistable_Interrupts_Sensations | Process_Resistable_Interrupts_Emotions,
 		Process_Info                        : ([
 			"Ganesha_Invocation_Process"    : True,
 			"ability"                       : query_invocation_ability(who),

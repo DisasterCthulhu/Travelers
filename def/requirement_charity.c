@@ -1,6 +1,6 @@
+#include <Travelers.h>
 #include <daemon.h>
 #include <experience.h>
-#include <Travelers.h>
 
 inherit Travelers_Definition("Requirement");
 
@@ -11,6 +11,10 @@ void travelers_requirement_charity_at_wealth_given(mapping info) {
 	if(amount < 1000)
 		return;
 	object challenge = Travelers_Find_Challenge(who);
+	if(!challenge) {
+		requirement_disengage_hooks(who);
+		return;
+	}
 	string ident = target->query_extant() || object_name(target);
 	string array individuals = challenge->query_info("Individuals");
 	if(member(individuals, ident) != Null)
@@ -19,6 +23,8 @@ void travelers_requirement_charity_at_wealth_given(mapping info) {
 	if(target_wealth >= 100)
 		return;
 	if(!target->sentience() || !target->sentience()->query_sentience_abstraction())
+		return;
+	if(target->query_extension(LS_Extension("banker")))
 		return;
 	mapping area_counts = challenge->query_info("Area_Counts");
 	string area = 0;

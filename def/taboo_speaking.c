@@ -6,7 +6,7 @@
 inherit Travelers_Definition("Taboo");
 
 void travelers_taboo_speaking_do_speak(descriptor dxr) {
-    if(Speech_Flag_Check(dxr, Speech_Flag_OOC))
+    if(Speech_Flag_Check(dxr, Speech_Flag_OOC) || Speech_Flag_Check(dxr, Speech_Flag_Gestural))
         return;
     object who = Speech_Query(dxr, Speech_Speaker);
     object challenge = Travelers_Find_Challenge(who);
@@ -26,6 +26,7 @@ void configure() {
 	set_taboo_initialize_description("speaking");
 	set_taboo_overcome_description("speaking");
     set_challenge_component_selection_adjustments(([
+        "celebration"                           : 0.00,
         "charity"                               : 0.50,
         "experience"                            : 1.00,
         "exploration"                           : 0.25,

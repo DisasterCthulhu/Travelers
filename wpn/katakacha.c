@@ -662,8 +662,8 @@ void configure() {
 	add_hook(Do_Unequip_Item, #'katakacha_do_unequip);
 }
 
-void process_post_restore(object who, record save) {
-	::process_post_restore(who, save);
+void process_post_restore(object who, record save, int restore_flags) {
+	::process_post_restore(who, save, restore_flags);
 	set_transactional_container(False);
 	set_configuration_freeze(Configuration_Container_Status, True);
 }
@@ -673,7 +673,7 @@ status drop() {
 }
 
 status query_auto_keep(object who) {
-	return who->query_affiliation(project_control());
+	return who->query_affiliation(project_control()) || ::query_auto_keep(who);
 }
 
 // hack to ignite webbing when it's got a hot damage type.  ideally this would be modelled by making the motes

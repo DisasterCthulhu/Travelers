@@ -11,6 +11,7 @@ private int rarity;
 private int type;
 private int value;
 private mixed array katakacha_damage_types;
+private string array kabatha_resistance_types;
 private status universality;
 private string array required_bestowals;
 private string description;
@@ -176,6 +177,14 @@ string array query_bestowal_katakacha_damage_types_and_combos() {
 	return sort_array(out, #'>);
 }
 
+void set_bestowal_kabatha_resistances(string array types) {
+	kabatha_resistance_types = types;
+}
+
+mixed array query_bestowal_kabatha_resistances() {
+	return kabatha_resistance_types;
+}
+
 void bestowal_bestow(object who) {
 	who->display(query_bestowal_display());
 	funcall(reward_process, who);
@@ -222,38 +231,34 @@ void bestowal_deliver(object who, mixed what) {
 	}
 }
 
-varargs mixed bestowal_find_safe_master_items(string prefix, int categories, status include_rarities) {
+varargs mixed bestowal_find_safe_items(int effect_class, int categories, status include_rarities) {
 	mapping out = ([]);
-	foreach(descriptor dxr : Daemon_Master->query_published_items()) {
-		if(Item_Query(dxr, Item_Dangers))
+	foreach(descriptor dxr : Daemon_Items->query_items()) {
+		if(Item_Query(dxr, Item_Dangers) & ~Item_Danger_Severe_Effect)
 			continue;
 		if(categories && (Item_Query(dxr, Item_Categories) & categories) != categories)
 			continue;
+		if(Item_Query(dxr, Item_Effect_Class) != effect_class)
+			continue;
 		int weight = Rarity(Item_Query(dxr, Item_Rarity))->query_rarity_weight();
 		mixed what = Item_Query(dxr, Item_File);
-		    //Debug_To("twilight", what);
 		switch(typeof(what)) {
 		case T_STRING   :
-			if(prefix && !begins_with(what, prefix))
-				continue;
 			out[what] = weight;
 			break;
 		case T_POINTER  :
 			{
 				int sub_weight = 0;
 				foreach(string item : what)
-					if(!prefix || begins_with(item, prefix))
-						out[item] = sub_weight ||= max(round(to_float(weight) / sizeof(what)), 1);
+					out[item] = sub_weight ||= max(round(to_float(weight) / sizeof(what)), 1);
 			}
 			break;
 		case T_MAPPING  :
 			{
 				int total = 0;
 				foreach(string item, int sub_weight : what) {
-					if(!prefix || begins_with(item, prefix)) {
-						total ||= accumulate(values(what));
-						out[item] = max(round(to_float(weight) * sub_weight / total), 1);
-					}
+					total ||= accumulate(values(what));
+					out[item] = max(round(to_float(weight) * sub_weight / total), 1);
 				}
 			}
 		}

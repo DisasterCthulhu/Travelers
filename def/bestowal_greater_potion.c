@@ -6,7 +6,7 @@ inherit Travelers_Definition("Bestowal");
 internal mixed potions;
 
 mixed bestowal_potions() {
-	return bestowal_find_safe_master_items(LS_Potion("greater_"), Item_Category_Comestible | Item_Category_Drink | Item_Category_Magical);
+	return bestowal_find_safe_items(Effect_Class_Greater, Item_Category_Comestible | Item_Category_Drink | Item_Category_Magical);
 }
 
 void configure() {

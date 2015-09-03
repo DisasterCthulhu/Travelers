@@ -43,6 +43,10 @@ void configure() {
 	set_invocation_begin_can_call((:
 		descriptor dxr = $1;
 		object who = Process_Query(dxr, Process_Actor);
+		if(!Empathic_Bonds_Can_Be_Consort(who))
+		    return Error(({
+		        who, ({ "cannot", who }), "become consort to a familiar",
+		    }));
 		if(!who->sentience()->query_sentience_emotion())
 		    return Error(({
 		        who, ({ "cannot", who }), "use this invocation unless you are capable of feeling empathy",

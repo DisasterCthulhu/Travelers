@@ -166,7 +166,7 @@ void configure() {
 	:));
     set_obstacle_overcome_process((:
         object who = $1->ganesha_challenge_query_owner();
-        disengage_obstacle_hooks(who);
+        obstacle_disengage_hooks(who);
         traveler_obstacle_flight_proscription_restore_wings(who);
     :));
 	set_obstacle_overcome_display(([

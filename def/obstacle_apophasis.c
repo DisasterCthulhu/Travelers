@@ -9,6 +9,7 @@ void configure() {
 	set_obstacle_rarity(Rarity_Very_Rare);
 	set_obstacle_value(Travelers_Obstacle_Value_High);
 	set_challenge_component_selection_adjustments(([
+	    "celebration"           : 0.00,
 		"experience"            : 0.75,
 		"exploration"           : 0.50,
 		"pilgrimage"            : 1.00,

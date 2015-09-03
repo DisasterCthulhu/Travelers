@@ -56,7 +56,7 @@ void configure() {
 				}),
 				Message_Senses                  : Message_Sense_Kinesthetic,
 			]));
-			foreach(object weapon               : weapons)
+			foreach(object weapon : weapons)
 				who->deutilize_item(weapon, Move_Flags_Force);
 		}
 		return;

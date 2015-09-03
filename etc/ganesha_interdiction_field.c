@@ -123,9 +123,9 @@ void configure() {
 		Element_Flags       : Element_Flag_Secondary,
 	]));
 	add_hook(Do_Move, #'ganesha_interdiction_field_do_move);
-	set_info("System_Suppress_Condition_Display", True);
-	set_info("System_Suppress_Size_Display", True);
-	set_info("System_Suppress_Weight_Display", True);
+	set_suppress_condition_display(True);
+	set_suppress_size_display(True);
+	set_suppress_weight_display(True);
 	set_value(0);
 }
 

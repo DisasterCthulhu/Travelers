@@ -7,12 +7,12 @@
 inherit Travelers_Definition("Invocation");
 
 object array invocation_sharanam_find_kazar_blades(object who) {
-    return filter(all_inventory(who), (:
+    return who->query_child_objects((:
         if($1->query_property(Prop_Manifestation))
             return False;
         if($1->is_kazarithax())
             return True;
-        if($1->id("KAZARZETH"))
+        if($1->id("KAZARZETH", Knowledge_Known))
             return True;
         return False;
     :));
@@ -49,7 +49,7 @@ void configure() {
 		descriptor dxr = $1;
 		object who = Process_Query(dxr, Process_Actor);
 		object array blades = invocation_sharanam_find_kazar_blades(who);
-		if(!blades || !sizeof(blades))
+		if(!sizeof(blades))
 		    return Error(({
 				"there are no kazar blades on", ({ 's', who, "person" }), 
 			}));
@@ -99,16 +99,17 @@ void configure() {
 			Message_Senses          : Message_Sense_Astral | Message_Sense_Visual,
 		]));
 		int sonority = query_invocation_sonority(who);
-		int duration = scale_conversion(sonority, 0, 100, Time_Hour, Time_Day) * sizeof(blades);
+		int duration = scale_conversion(sonority, 0, 100, Time_Hour, Time_Day * sizeof(blades));
 		Ganesha_Add_Karma_Phala(who, sizeof(blades));
 		blades->remove();
-		int amount = round(diminishing_returns(Ganesha_Query_Karma_Phala(who), 1) + 150);
+		int amount = round(diminishing_returns(Ganesha_Query_Karma_Phala(who), 0.5) + 100);
 		who->add_attribute_modifier(([
 		    Modifier_Index          : Basic_Attributes,
 		    Modifier_Amount         : amount,
 		    Modifier_Bound          : amount + 200,
 		    Modifier_Flags          : Modifier_Flag_Mergeable,
 		    Modifier_Duration       : duration,
+		    Modifier_Max_Duration   : duration * 3,
 		    Modifier_Add_Display    : ([
 		        Message_Content     : ({
 		            0, ({ "feel", 0 }), ({ 'l', 0 }), "come into momentary contact with the divine",
@@ -137,12 +138,14 @@ void configure() {
 		who->add_speed_modifier(([
 		    Modifier_Amount         : 25,
 		    Modifier_Duration       : duration,
+		    Modifier_Max_Duration   : duration * 3,
 		    Modifier_Flags          : Modifier_Flag_Mergeable,
 		]));
 		who->add_trait_modifier(([
 		    Modifier_Index          : Trait_Order_Favour,
 		    Modifier_Amount         : 5,
 		    Modifier_Duration       : duration,
+		    Modifier_Max_Duration   : duration * 3,
 		    Modifier_Flags          : Modifier_Flag_Mergeable,
 		]));
 		Wild_Talents_Control->awakening_event(who, "mental enhancement", 500);

@@ -5,8 +5,7 @@
 
 inherit Travelers_Definition("Taboo");
 
-void travelers_taboo_being_unhurried_do_heart_beat(mapping args) {
-    object who = args["who"];
+void travelers_taboo_being_unhurried_at_heart_beat(object who) {
     object challenge = Travelers_Find_Challenge(who);
     int time_taken = challenge->query_info("Time_Taken") + 2;
     challenge->set_info("Time_Taken", time_taken);
@@ -35,5 +34,5 @@ void configure() {
         "skill experience"                      : 1.00,
         "neophyte guidance"                     : 0.00,
     ]));
-	add_taboo_hook(Do_Heart_Beat, #'travelers_taboo_being_unhurried_do_heart_beat);
+	add_taboo_hook(At_Heart_Beat, #'travelers_taboo_being_unhurried_at_heart_beat);
 }

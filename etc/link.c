@@ -3,6 +3,8 @@
 #include <specialty_access.h>
 #include <speech.h>
 #include <Travelers.h>
+#include <Empathic_Bonds.h>
+#include <bond.h>
 
 inherit "/std/affiliation_link";
 
@@ -30,8 +32,15 @@ void travelers_convert_old_info() {
 }
 
 string array travelers_query_conceptual_navigation_points() {
-	info["conceptual navigation points"] ||= ({});
-	return info["conceptual navigation points"];
+	return info["conceptual navigation points"] ||= ({});
+}
+
+int travelers_query_unused_conceptual_navigation_point_count() {
+	int out = 0;
+	foreach(string point : travelers_query_conceptual_navigation_points())
+		if(!point)
+			out++;
+	return out;
 }
 
 int travelers_query_conceptual_navigation_points_count() {
@@ -43,11 +52,17 @@ string travelers_query_conceptual_navigation_point(int count) {
 }
 
 object array travelers_query_conceptual_navigation_point_rooms() {
-	return map(travelers_query_conceptual_navigation_points(), (:
+	string array points = travelers_query_conceptual_navigation_points();
+	return map(points, (:
 		unless($1)
 			return $1;
+		if(catch(resolve_project_path($1)->load())) {
+			int idx = member($2, $1);
+			info["conceptual navigation points"][idx] = 0;
+			return 0;
+		}
 		return resolve_project_path($1)->load();
-	:));
+	:), points);
 }
 
 object travelers_query_conceptual_navigation_point_room(int count) {
@@ -99,11 +114,17 @@ string travelers_query_divine_waypoint(int count) {
 }
 
 object array travelers_query_divine_waypoint_rooms() {
-	return map(travelers_query_divine_waypoints(), (:
+	string array waypoints = travelers_query_divine_waypoints();
+	return map(waypoints, (:
 		unless($1)
 			return $1;
+		if(catch(resolve_project_path($1)->load())) {
+			int idx = member($2, $1);
+			info["divine waypoints"][idx] = 0;
+			return 0;
+		}
 		return resolve_project_path($1)->load();
-	:));
+	:), waypoints);
 }
 
 object travelers_query_divine_waypoint_room(int count) {
@@ -174,6 +195,15 @@ void travelers_bestowal_bestowed(object bestowal) {
 	if(type == Travelers_Bestowal_Type_Attribute_Adjustment) {
 		int array adjust = bestowal->query_bestowal_attribute_adjustment();
 		owner->add_permanent_attribute_adjustment(adjust[0], adjust[1]);
+	}
+	if(type == Travelers_Bestowal_Type_Kabatha_Resistance) {
+		descriptor bond = Empathic_Bonds_Find_Affiliation_Bond(owner, project_control());
+		if(bond) {
+			object familiar = Bond_Query(bond, Bond_Familiar);
+			object kabatha = familiar && familiar->query_child_object("is_kabatha");
+			if(kabatha)
+				kabatha->kabatha_update_resistances(familiar, bestowal->query_bestowal_kabatha_resistances());
+		}
 	}
 }
 
@@ -249,7 +279,6 @@ void configure() {
 	set_id(({ "TRAVELERS", "GUILDOBJ" }));
 	set_score_prepend("You are a Traveler.");
 	set_score_append("Type 'help Travelers' for information.");
-	add_affiliation_news_file(Travelers_Text("news"));
 }
 
 void attach_affiliation(object who, mixed conf) {

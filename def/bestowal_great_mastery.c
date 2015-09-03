@@ -22,8 +22,13 @@ void configure() {
 		int array skills = ({});
 		foreach(int skill : who->query_skills()) {
 			object def = Skill(skill);
-			if(def->query_skill_pedagogy() == Skill_Pedagogy_Physical_Training && def->query_skill_class() != Skill_Class_Divine)
-				skills += ({ skill });
+			if(def->query_skill_pedagogy() != Skill_Pedagogy_Physical_Training)
+				continue;
+			if(def->query_skill_class() == Skill_Class_Divine)
+				continue;
+			if(def->query_skill_require_ability() && !who->query_skill_known(skill))
+				continue;
+			skills += ({ skill });
 		}
 		if(!sizeof(skills))
 			return;

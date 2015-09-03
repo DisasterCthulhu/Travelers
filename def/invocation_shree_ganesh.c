@@ -74,6 +74,10 @@ void configure() {
 		descriptor dxr = $1;
 		object who = Process_Query(dxr, Process_Actor);
 		object target = Process_Query(dxr, Process_Target);
+		if(!target)
+			return Error(({
+				({ 's', who, "target" }), "is no longer present",
+			}));
 		unless(environment(target) == environment(who))
 			return Error(({
 				target, ({ "are", target }), "no longer in", ({ 's', who, "presence" })

@@ -1,9 +1,10 @@
 #include <Travelers.h>
 #include <daemon.h>
 
-internal mapping adjustments;
-
 inherit "/std/definition";
+inherit "/mod/basic/credits";
+
+internal mapping adjustments;
 
 void set_challenge_component_selection_adjustments(mapping what) {
     adjustments = what;

@@ -5,56 +5,75 @@
 inherit "/std/daemon";
 inherit "/mod/daemon/broker";
 
-internal mapping creator_benefits;
-internal mapping obstacle_lookup = ([]);
-internal mapping obstacle_rarities = ([]);
-internal mapping requirement_lookup = ([]);
-internal mapping requirement_rarities = ([]);
-internal mapping bestowal_lookup = ([]);
-internal mapping bestowal_rarities = ([]);
-internal mapping taboo_lookup = ([]);
-internal mapping taboo_rarities = ([]);
-internal mapping forfeit_lookup = ([]);
-internal mapping forfeit_rarities = ([]);
-internal mapping invocation_lookup = ([]);
-internal mapping invocation_rarities = ([]);
-internal mapping help_lookup = ([]);
-internal mapping challenge_component_selection_adjustment_index = ([]);
-internal object array valid_obstacles = ({});
-internal string array obstacle_names = ({});
-internal string array taboo_names = ({});
-internal object array valid_taboos = ({});
-internal string array forfeit_names = ({});
-internal object array valid_forfeits = ({});
-internal object array valid_requirements = ({});
-internal string array requirement_names = ({});
-internal object array valid_bestowals = ({});
-internal string array bestowal_names = ({});
-internal object array valid_invocations = ({});
-internal string array invocation_names = ({});
+nosave private descriptor karma_phala_add_display;
+nosave private descriptor karma_phala_remove_display;
+nosave private mapping bestowal_lookup = ([]);
+nosave private mapping bestowal_rarities = ([]);
+nosave private mapping challenge_component_selection_adjustment_index = ([]);
+nosave private mapping creator_benefits;
+nosave private mapping forfeit_lookup = ([]);
+nosave private mapping forfeit_rarities = ([]);
+nosave private mapping help_lookup = ([]);
+nosave private mapping invocation_lookup = ([]);
+nosave private mapping invocation_rarities = ([]);
+nosave private mapping obstacle_lookup = ([]);
+nosave private mapping obstacle_rarities = ([]);
+nosave private mapping requirement_lookup = ([]);
+nosave private mapping requirement_rarities = ([]);
+nosave private mapping taboo_lookup = ([]);
+nosave private mapping taboo_rarities = ([]);
+nosave private object array valid_bestowals = ({});
+nosave private object array valid_forfeits = ({});
+nosave private object array valid_invocations = ({});
+nosave private object array valid_obstacles = ({});
+nosave private object array valid_requirements = ({});
+nosave private object array valid_taboos = ({});
+nosave private string array bestowal_names = ({});
+nosave private string array forfeit_names = ({});
+nosave private string array invocation_names = ({});
+nosave private string array obstacle_names = ({});
+nosave private string array requirement_names = ({});
+nosave private string array taboo_names = ({});
+private mapping requirement_suspensions;
 
-void register_obstacle(object def);
-void unregister_obstacle(object def);
-void register_requirement(object def);
-void unregister_requirement(object def);
-void register_bestowal(object def);
-void unregister_bestowal(object def);
-void register_taboo(object def);
-void unregister_taboo(object def);
-void register_forfeit(object def);
-void unregister_forfeit(object def);
-void register_invocation(object def);
-void unregister_invocation(object def);
+int dharma_query_requirement_suspension(mixed req);
+string bestowal_select();
+string forfeit_select();
+string invocation_select();
 string obstacle_select();
 string requirement_select();
-string bestowal_select();
-string invocation_select();
 string taboo_select();
-string forfeit_select();
+void register_bestowal(object def);
+void register_forfeit(object def);
+void register_invocation(object def);
+void register_obstacle(object def);
+void register_requirement(object def);
+void register_taboo(object def);
+void unregister_bestowal(object def);
+void unregister_forfeit(object def);
+void unregister_invocation(object def);
+void unregister_obstacle(object def);
+void unregister_requirement(object def);
+void unregister_taboo(object def);
 
 void preinit() {
 	::preinit();
-	creator_benefits = Persistence(Persistence_Tag("creator_benefits"), ([]));
+	creator_benefits = Persistence(Persistence_Tag("creator_benefits"), (: ([]) :));
+	requirement_suspensions = Persistence(Persistence_Tag("requirement_suspensions"), (: ([]) :));
+	karma_phala_add_display = ([
+		Message_Content                     : ({
+			0, ({ "sense", 0 }), "Ganesha looking upon", ({ 'o', 0 }), "favorably",
+		}),
+		Message_Senses                      : Message_Sense_Spiritual,
+		Message_Color                       : "status: enhancement",
+	]);
+	karma_phala_remove_display = ([
+		Message_Content                     : ({
+			0, ({ "sense", 0 }), "Ganesha looking upon", ({ 'o', 0 }), "unfavorably",
+		}),
+		Message_Senses                      : Message_Sense_Spiritual,
+		Message_Color                       : "status: loss",
+	]);
 }
 
 void configure() {
@@ -86,73 +105,77 @@ void configure() {
 }
 
 void set_challenge_component_selection_adjustment(string index, string value, float adjust) {
-    challenge_component_selection_adjustment_index[index] ||= ([]);
-    if(challenge_component_selection_adjustment_index[index][value])
-        warn("tried to overwrite component selection index " + index + ", value " + value);
-    else
-        challenge_component_selection_adjustment_index[index][value] = adjust;
+	challenge_component_selection_adjustment_index[index] ||= ([]);
+	if(challenge_component_selection_adjustment_index[index][value])
+		warn("tried to overwrite component selection index " + index + ", value " + value);
+	else
+		challenge_component_selection_adjustment_index[index][value] = adjust;
 }
 
 void register_challenge_component_selection_adjustments(object component) {
-    mapping component_adjustments = component->query_challenge_component_selection_adjustments();
-    if(!component_adjustments)
-        return;
-    string component_name = component->query_challenge_component_name();
-    foreach(string what, float adjust : component_adjustments) {
-        set_challenge_component_selection_adjustment(what, component_name, adjust);
-        set_challenge_component_selection_adjustment(component_name, what, adjust);
-    }
+	mapping component_adjustments = component->query_challenge_component_selection_adjustments();
+	if(!component_adjustments)
+		return;
+	string component_name = component->query_challenge_component_name();
+	foreach(string what, float adjust : component_adjustments) {
+		set_challenge_component_selection_adjustment(what, component_name, adjust);
+		set_challenge_component_selection_adjustment(component_name, what, adjust);
+	}
 }
 
 void unregister_challenge_component_selection_adjustments(object component) {
-    string component_name = component->query_challenge_component_name();
-    m_delete(challenge_component_selection_adjustment_index, component_name);
-    foreach(string index, mapping adjustments : challenge_component_selection_adjustment_index)
-        m_delete(adjustments, component_name);
+	string component_name = component->query_challenge_component_name();
+	m_delete(challenge_component_selection_adjustment_index, component_name);
+	foreach(string index, mapping adjustments : challenge_component_selection_adjustment_index)
+		m_delete(adjustments, component_name);
 }
 
 mapping query_challenge_component_selection_adjustment_index() {
-    return challenge_component_selection_adjustment_index;
+	return challenge_component_selection_adjustment_index;
 }
 
 void register_obstacle(object def) {
 	string name = def->query_obstacle_name();
 	obstacle_rarities[name] = def->query_obstacle_rarity();
 	obstacle_lookup[name] = def;
+	if(member(valid_obstacles, 0) != Null)
+		array_strip_zeroes(&valid_obstacles);
 	array_specify(&valid_obstacles, def);
 	array_specify(&obstacle_names, name);
-	valid_obstacles -= ({ 0 });
 	register_challenge_component_selection_adjustments(def);
 }
 
 void unregister_obstacle(object def) {
-    unregister_challenge_component_selection_adjustments(def);
+	unregister_challenge_component_selection_adjustments(def);
 	string name = def->query_obstacle_name();
 	m_delete(obstacle_rarities, name);
 	m_delete(obstacle_lookup, name);
 	array_remove(&valid_obstacles, name);
 	array_remove(&obstacle_names, name);
-	valid_obstacles -= ({ 0 });
+	if(member(valid_obstacles, 0) != Null)
+		array_strip_zeroes(&valid_obstacles);
 }
 
 void register_requirement(object def) {
 	string name = def->query_requirement_name();
 	requirement_rarities[name] = def->query_requirement_rarity();
 	requirement_lookup[name] = def;
+	if(member(valid_requirements, 0) != Null)
+		array_strip_zeroes(&valid_requirements);
 	array_specify(&valid_requirements, def);
 	array_specify(&requirement_names, name);
-	valid_requirements -= ({ 0 });
 	register_challenge_component_selection_adjustments(def);
 }
 
 void unregister_requirement(object def) {
-    unregister_challenge_component_selection_adjustments(def);
+	unregister_challenge_component_selection_adjustments(def);
 	string name = def->query_requirement_name();
 	m_delete(requirement_rarities, name);
 	m_delete(requirement_lookup, name);
 	array_remove(&valid_requirements, def);
 	array_remove(&requirement_names, name);
-	valid_requirements -= ({ 0 });
+	if(member(valid_requirements, 0) != Null)
+		array_strip_zeroes(&valid_requirements);
 }
 
 void register_taboo(object def) {
@@ -161,38 +184,42 @@ void register_taboo(object def) {
 	taboo_lookup[name] = def;
 	array_specify(&valid_taboos, def);
 	array_specify(&taboo_names, name);
-	valid_taboos -= ({ 0 });
+	if(member(valid_taboos, 0) != Null)
+		array_strip_zeroes(&valid_taboos);
 	register_challenge_component_selection_adjustments(def);
 }
 
 void unregister_taboo(object def) {
-    unregister_challenge_component_selection_adjustments(def);
+	unregister_challenge_component_selection_adjustments(def);
 	string name = def->query_taboo_name();
 	m_delete(taboo_rarities, name);
 	m_delete(taboo_lookup, name);
 	array_remove(&valid_taboos, def);
 	array_remove(&taboo_names, name);
-	valid_taboos -= ({ 0 });
+	if(member(valid_taboos, 0) != Null)
+		array_strip_zeroes(&valid_taboos);
 }
 
 void register_forfeit(object def) {
 	string name = def->query_forfeit_name();
 	forfeit_rarities[name] = def->query_forfeit_rarity();
 	forfeit_lookup[name] = def;
+	if(member(valid_forfeits, 0) != Null)
+		array_strip_zeroes(&valid_forfeits);
 	array_specify(&valid_forfeits, def);
 	array_specify(&forfeit_names, name);
-	valid_forfeits -= ({ 0 });
 	register_challenge_component_selection_adjustments(def);
 }
 
 void unregister_forfeit(object def) {
-    unregister_challenge_component_selection_adjustments(def);
+	unregister_challenge_component_selection_adjustments(def);
 	string name = def->query_forfeit_name();
 	m_delete(forfeit_rarities, name);
 	m_delete(forfeit_lookup, name);
 	array_remove(&valid_forfeits, def);
 	array_remove(&forfeit_names, name);
-	valid_forfeits -= ({ 0 });
+	if(member(valid_forfeits, 0) != Null)
+		array_strip_zeroes(&valid_forfeits);
 }
 
 void register_bestowal(object def) {
@@ -201,18 +228,20 @@ void register_bestowal(object def) {
 	bestowal_lookup[name] = def;
 	array_specify(&valid_bestowals, def);
 	array_specify(&bestowal_names, name);
-	valid_bestowals -= ({ 0 });
+	if(member(valid_bestowals, 0) != Null)
+		array_strip_zeroes(&valid_bestowals);
 	register_challenge_component_selection_adjustments(def);
 }
 
 void unregister_bestowal(object def) {
-    unregister_challenge_component_selection_adjustments(def);
+	unregister_challenge_component_selection_adjustments(def);
 	string name = def->query_bestowal_name();
 	m_delete(bestowal_rarities, name);
 	m_delete(bestowal_lookup, name);
 	array_remove(&valid_bestowals, def);
 	array_remove(&bestowal_names, name);
-	valid_bestowals -= ({ 0 });
+	if(member(valid_bestowals, 0) != Null)
+		array_strip_zeroes(&valid_bestowals);
 }
 
 string help_invocation(object who, string what) {
@@ -225,9 +254,10 @@ void register_invocation(object def) {
 	invocation_rarities[name] = def->query_invocation_rarity();
 	invocation_lookup[name] = def;
 	help_lookup[name] = #'help_invocation;
+	if(member(valid_invocations, 0) != Null)
+		array_strip_zeroes(&valid_invocations);
 	array_specify(&valid_invocations, def);
 	array_specify(&invocation_names, name);
-	valid_invocations -= ({ 0 });
 }
 
 void unregister_invocation(object def) {
@@ -236,7 +266,8 @@ void unregister_invocation(object def) {
 	m_delete(invocation_lookup, name);
 	array_remove(&valid_invocations, def);
 	array_remove(&invocation_names, name);
-	valid_invocations -= ({ 0 });
+	if(member(valid_invocations, 0) != Null)
+		array_strip_zeroes(&valid_invocations);
 }
 
 string array query_available_obstacles() {
@@ -353,205 +384,200 @@ int query_invocation_rarity(string invocation) {
 
 status is_obstacle(mixed what) {
 	switch(typeof(what)) {
-	case T_STRING :
-		return member(obstacle_lookup, lower_case(what));
-	case T_OBJECT :
+	case T_STRING   :
+		return member(obstacle_lookup, what);
+	case T_OBJECT   :
 		return member(valid_obstacles, what) != Null;
-	default       :
+	default         :
 		return False;
 	}
 }
 
 object obstacle(mixed what) {
 	switch(typeof(what)) {
-	case T_STRING :
-		string str = lower_case(what);
-		object obj = Travelers_Definition("obstacle_" + replace(str, " ", "_"))->load();
-		return obstacle_lookup[lower_case(what)] || obj || error("Invalid obstacle '" + what + "'");
-	case T_OBJECT :
+	case T_STRING   :
+		return obstacle_lookup[what] || error("Invalid obstacle name " + printable(what));
+	case T_OBJECT   :
 		return what;
-	default       :
+	default         :
 		error("Invalid obstacle specification, " + printable(what));
 	}
 }
 
 status is_requirement(mixed what) {
 	switch(typeof(what)) {
-	case T_STRING :
-		return member(requirement_lookup, lower_case(what));
-	case T_OBJECT :
+	case T_STRING   :
+		return member(requirement_lookup, what);
+	case T_OBJECT   :
 		return member(valid_requirements, what) != Null;
-	default       :
+	default         :
 		return False;
 	}
 }
 
 object requirement(mixed what) {
 	switch(typeof(what)) {
-	case T_STRING :
-		return requirement_lookup[lower_case(what)] || error("Invalid requirement '" + what + "'");
-	case T_OBJECT :
+	case T_STRING   :
+		return requirement_lookup[what] || error("Invalid requirement name " + printable(what));
+	case T_OBJECT   :
 		return what;
-	default       :
+	default         :
 		error("Invalid requirement specification, " + printable(what));
 	}
 }
 
 status is_taboo(mixed what) {
 	switch(typeof(what)) {
-	case T_STRING :
-		return member(taboo_lookup, lower_case(what));
-	case T_OBJECT :
+	case T_STRING   :
+		return member(taboo_lookup, what);
+	case T_OBJECT   :
 		return member(valid_taboos, what) != Null;
-	default       :
+	default         :
 		return False;
 	}
 }
 
 object taboo(mixed what) {
 	switch(typeof(what)) {
-	case T_STRING :
-		return taboo_lookup[lower_case(what)] || error("Invalid taboo '" + what + "'");
-	case T_OBJECT :
+	case T_STRING   :
+		return taboo_lookup[what] || error("Invalid taboo name " + printable(what));
+	case T_OBJECT   :
 		return what;
-	default       :
+	default         :
 		error("Invalid taboo specification, " + printable(what));
 	}
 }
 
 status is_forfeit(mixed what) {
 	switch(typeof(what)) {
-	case T_STRING :
-		return member(forfeit_lookup, lower_case(what));
-	case T_OBJECT :
+	case T_STRING   :
+		return member(forfeit_lookup, what);
+	case T_OBJECT   :
 		return member(valid_forfeits, what) != Null;
-	default       :
+	default         :
 		return False;
 	}
 }
 
 object forfeit(mixed what) {
 	switch(typeof(what)) {
-	case T_STRING :
-		return forfeit_lookup[lower_case(what)] || error("Invalid forfeit '" + what + "'");
-	case T_OBJECT :
+	case T_STRING   :
+		return forfeit_lookup[what] || error("Invalid forfeit " + printable(what));
+	case T_OBJECT   :
 		return what;
-	default       :
+	default         :
 		error("Invalid forfeit specification, " + printable(what));
 	}
 }
 
 status is_bestowal(mixed what) {
 	switch(typeof(what)) {
-	case T_STRING :
-		return member(bestowal_lookup, lower_case(what));
-	case T_OBJECT :
+	case T_STRING   :
+		return member(bestowal_lookup, what);
+	case T_OBJECT   :
 		return member(valid_bestowals, what) != Null;
-	default       :
+	default         :
 		return False;
 	}
 }
 
 object bestowal(mixed what) {
 	switch(typeof(what)) {
-	case T_STRING :
-		return bestowal_lookup[lower_case(what)] || error("Invalid bestowal '" + what + "'");
-	case T_OBJECT :
+	case T_STRING   :
+		return bestowal_lookup[what] || error("Invalid bestowal " + printable(what));
+	case T_OBJECT   :
 		return what;
-	default       :
+	default         :
 		error("Invalid bestowal specification, " + printable(what));
 	}
 }
 
 status is_invocation(mixed what) {
 	switch(typeof(what)) {
-	case T_STRING :
-		return member(invocation_lookup, lower_case(what));
-	case T_OBJECT :
+	case T_STRING   :
+		return member(invocation_lookup, what);
+	case T_OBJECT   :
 		return member(valid_invocations, what) != Null;
-	default       :
+	default         :
 		return False;
 	}
 }
 
 object invocation(mixed what) {
 	switch(typeof(what)) {
-	case T_STRING :
-		return invocation_lookup[lower_case(what)] || error("Invalid invocation '" + what + "'");
-	case T_OBJECT :
+	case T_STRING   :
+		return invocation_lookup[what] || error("Invalid invocation " + printable(what));
+	case T_OBJECT   :
 		return what;
-	default       :
+	default         :
 		error("Invalid invocation specification, " + printable(what));
 	}
 }
 
 int ganesha_query_karma_phala(object who) {
-    return who->query_info("Ganesha_Karma_Phala");
+	return who->query_info("Ganesha_Karma_Phala");
 }
 
 int ganesha_set_karma_phala(object who, int amount) {
-    who->set_info("Ganesha_Karma_Phala", amount);
-    return amount;
+	who->set_info("Ganesha_Karma_Phala", amount);
+	return amount;
 }
 
 int ganesha_add_karma_phala(object who, int amount) {
-    if(amount > 0)
-        who->display(([
-            Message_Content                     : ({
-                0, ({ "sense", 0 }), "Ganesha looking upon", ({ 'o', 0 }), "favorably",
-            }),
-            Message_Senses                      : Message_Sense_Spiritual,
-            Message_Color                       : "status: enhancement",
-        ]));
-    else if(amount < 0)
-        who->display(([
-            Message_Content                     : ({
-                0, ({ "sense", 0 }), "Ganesha looking upon", ({ 'o', 0 }), "unfavorably",
-            }),
-            Message_Senses                      : Message_Sense_Spiritual,
-            Message_Color                       : "status: loss",
-        ]));
-    return ganesha_set_karma_phala(who, ganesha_query_karma_phala(who) + amount);
+	if(amount > 0)
+		who->display(karma_phala_add_display);
+	else if(amount < 0)
+		who->display(karma_phala_remove_display);
+	return ganesha_set_karma_phala(who, ganesha_query_karma_phala(who) + amount);
 }
 
 object find_challenge(object who) {
-	object array challenges = filter(all_inventory(who), (: $1->is_ganesha_challenge() :));
-	if(sizeof(challenges) > 1)
-		error("multiple challenges found on " + printable(who));
-	if(!sizeof(challenges))
-		return 0;
-	return challenges[0];
+	object out = 0;
+	for(object obj = first_inventory(who); obj; obj = next_inventory(obj))
+		if(obj->is_ganesha_challenge())
+			if(out)
+				error("Multiple challenges found on " + printable(who));
+			else
+				out = obj;
+	return out;
 }
 
 object find_interdiction_field(object who) {
-	object array fields = filter(all_inventory(who), (: $1->is_ganesha_interdiction_field() :));
-	if(sizeof(fields) > 1)
-		error("multiple interdiction fields found on " + printable(who));
-	if(!sizeof(fields))
-		return 0;
-	return fields[0];
+	object out = 0;
+	for(object obj = first_inventory(who); obj; obj = next_inventory(obj))
+		if(obj->is_ganesha_interdiction_field())
+			if(out)
+				error("Multiple interdiction fields found on " + printable(who));
+			else
+				out = obj;
+	return out;
+}
+
+private void impose_challenge_component_selection_adjustments(mapping prob, string component) {
+	if(!component)
+		return;
+	mapping adjusts = challenge_component_selection_adjustment_index[component];
+	if(!adjusts)
+		return;
+	foreach(string adjustment, float adjust : adjusts)
+		if(prob[adjustment])
+			prob[adjustment] *= adjust;
+		else
+			prob[adjustment] = adjust;
 }
 
 mapping query_challenge_selection_adjustments(object challenge) {
-    mapping out = ([]);
-    string requirement = challenge->ganesha_challenge_query_requirement();
-    string obstacle = challenge->ganesha_challenge_query_obstacle();
-    string taboo = challenge->ganesha_challenge_query_taboo();
-    string forfeit = challenge->ganesha_challenge_query_forfeit();
-    string array components = ({ requirement, obstacle, taboo, forfeit });
-    components -= ({ 0 });
-    foreach(string component : components) {
-        if(challenge_component_selection_adjustment_index[component]) {
-            foreach(string adjustment, float adjust : challenge_component_selection_adjustment_index[component]) {
-                if(out[adjustment]) {
-                    out[adjustment] *= adjust;
-                } else {
-                    out[adjustment] = adjust;
-                }
-            }
-        }
-    }
-    return out;
+	string requirement = challenge->ganesha_challenge_query_requirement();
+	string obstacle = challenge->ganesha_challenge_query_obstacle();
+	string taboo = challenge->ganesha_challenge_query_taboo();
+	string forfeit = challenge->ganesha_challenge_query_forfeit();
+	int num_components = (requirement && 1) + (obstacle && 1) + (taboo && 1) + (forfeit && 1);
+	mapping out = m_allocate(num_components * 2);
+	impose_challenge_component_selection_adjustments(out, requirement);
+	impose_challenge_component_selection_adjustments(out, obstacle);
+	impose_challenge_component_selection_adjustments(out, taboo);
+	impose_challenge_component_selection_adjustments(out, forfeit);
+	return out;
 }
 
 string generate_random_obstacle(object challenge) {
@@ -565,7 +591,9 @@ string generate_random_obstacle(object challenge) {
 string generate_random_requirement(object challenge) {
 	mapping adjust = query_challenge_selection_adjustments(challenge);
 	foreach(object valid_requirement : query_valid_requirements())
-		if(!valid_requirement->query_requirement_eligibility(challenge->ganesha_challenge_query_owner()))
+		if(valid_requirement->query_requirement_suspendable() && dharma_query_requirement_suspension(valid_requirement) > time())
+			adjust[valid_requirement->query_requirement_name()] = 0.0;   
+		else if(!valid_requirement->query_requirement_eligibility(challenge->ganesha_challenge_query_owner()))
 			adjust[valid_requirement->query_requirement_name()] = 0.0;   
 	return requirement_select(adjust);
 }
@@ -602,17 +630,16 @@ void benefit_challenge_creator(object challenge) {
 		if(link)
 			link->travelers_benefit_challenge_creator(value);
 	} else if(stringp(creator)) {
-	    creator_benefits[creator] ||= ({});
-		creator_benefits[creator] += ({ value });
+		array_push(creator_benefits[creator], value);
 	}
 }
 
 mixed query_creator_benefits() {
-    return creator_benefits;
+	return creator_benefits;
 }
 
 string array challenge_overcome(object challenge) {
-    string array out = ({});
+	string array out = ({});
 	object who = challenge->ganesha_challenge_query_owner();
 	mixed creator = challenge->ganesha_challenge_query_creator();
 	int value = challenge->ganesha_challenge_query_value();
@@ -653,3 +680,19 @@ mixed retrieve_help(string text, object who) {
 	return funcall(help_lookup[text], who, text);
 }
 
+void dharma_set_requirement_suspension(mixed req, int when) {
+	object def = Travelers_Requirement(req);
+	if(!def->query_requirement_suspendable())
+		error("Requirement " + def->query_requirement_name() + " is not suspendable");
+	requirement_suspensions[def->query_requirement_name()] = when;
+}
+
+mapping dharma_query_requirement_suspensions() {
+	return requirement_suspensions;
+}
+
+int dharma_query_requirement_suspension(mixed req) {
+	if(!stringp(req))
+		req = Travelers_Requirement(req)->query_requirement_name();
+	return requirement_suspensions[req];
+}

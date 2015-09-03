@@ -36,7 +36,7 @@ void configure() {
 		Modifier_Index          : ({
 			Attribute_Charisma,
 		}),
-		Modifier_Amount         : 0.75,
+		Modifier_Amount         : 0.45,
 	]));
 	add_obstacle_scaled_skill_modifier(([
 		Modifier_Index          : ({
@@ -62,7 +62,7 @@ void configure() {
 		    Skill_Killer_Instinct,
 		    Skill_Leadership,
 		}),
-		Modifier_Amount         : 0.50,
+		Modifier_Amount         : 0.45,
 	]));
 	set_obstacle_attach_process((:
 	    object who = $1->ganesha_challenge_query_owner();

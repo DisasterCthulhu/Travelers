@@ -28,6 +28,7 @@ void configure() {
 	set_taboo_initialize_description("ingesting any food or drink");
 	set_taboo_overcome_description("consumption");
     set_challenge_component_selection_adjustments(([
+        "celebration"                           : 0.00,
         "charity"                               : 0.25,
         "experience"                            : 0.75,
         "exploration"                           : 0.25,

@@ -23,7 +23,7 @@ void configure() {
         Condition_Info                          : Terrain_Water,
         Condition_Flags                         : Condition_Flag_Inverse,
     ]));
-	set_taboo_initialize_description("swim or otherwise become submerged in water");
+	set_taboo_initialize_description("swimming or otherwise becoming submerged in water");
 	set_taboo_overcome_description("swimming");
     set_challenge_component_selection_adjustments(([
         "charity"                               : 1.00,

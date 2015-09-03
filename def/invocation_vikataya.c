@@ -122,7 +122,7 @@ void configure() {
 			Conceptual_Navigation_Theorem_Enter_Message     : ({
 				"in a {{" + flower_color + "}swirl of colorful flower petals}",
 			}),
-			Conceptual_Navigation_Theorem_Start_Flags       : Conceptual_Navigation_Flag_Exclude_Followers | Conceptual_Navigation_Flag_Slow_Exit,
+			Conceptual_Navigation_Theorem_Start_Flags       : Conceptual_Navigation_Flag_Exclude_Companions | Conceptual_Navigation_Flag_Slow_Exit,
 		]));
 		who->set_info("Ganesha_Conceptual_Navigation_Time", time());
 		env->message(([

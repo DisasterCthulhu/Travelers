@@ -39,7 +39,7 @@ void configure() {
 	]));
 	add_obstacle_scaled_skill_modifier(([
 		Modifier_Index          : ({
-			Skill_Armour_Adaptation,
+			Skill_Armour_Use,
 			Skill_Balance,
 			Skill_Hardiness,
 			Skill_Load_Bearing,

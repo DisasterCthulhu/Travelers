@@ -5,10 +5,10 @@ inherit Travelers_Definition("Forfeit");
 
 object travelers_forfeit_banishment_query_banishment_location() {
 	return Random_Location(({
-		Select_Include_Danger(#'>=, Location_Danger_Moderate),
-		Select_Include_Egress(#'>=, Location_Egress_Difficult),
-		Select_Adjust_Danger(#'<, Location_Danger_Moderate, 0.02),
-		Select_Adjust_Danger(#'==, Location_Danger_Moderate, 0.10),
+		Select_Include_Danger(Select_Compare_Greater_Equal, Location_Danger_Moderate),
+		Select_Include_Egress(Select_Compare_Greater_Equal, Location_Egress_Difficult),
+		Select_Adjust_Danger(Select_Compare_Less, Location_Danger_Moderate, 0.02),
+		Select_Adjust_Danger(Select_Compare_Equal, Location_Danger_Moderate, 0.10),
 		Select_Adjust_Plane("the Prime", 0.10),
 		Select_Adjust_Plane("the Exoma", 0.50),
 	}));

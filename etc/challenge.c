@@ -5,7 +5,7 @@
 
 inherit "/std/effect";
 
-internal status recalculating;
+nosave private status recalculating;
 private mapping challenge;
 private status overcome;
 
@@ -31,9 +31,9 @@ void configure() {
 		Element_Type        : Material_Shekhinah,
 		Element_Proportion  : 0.01,
 	]));
-	set_info("System_Suppress_Condition_Display", True);
-	set_info("System_Suppress_Size_Display", True);
-	set_info("System_Suppress_Weight_Display", True);
+	set_suppress_condition_display(True);
+	set_suppress_size_display(True);
+	set_suppress_weight_display(True);
 */
 	add_property(Prop_Manifestation);
 	set_indestructible(True);
@@ -351,8 +351,8 @@ varargs status ganesha_challenge_initialize(object creator, object target, mixed
 	return True;
 }
 
-void process_post_restore(object who, record save) {
-	::process_post_restore(who, save);
+void process_post_restore(object who, record save, int restore_flags) {
+	::process_post_restore(who, save, restore_flags);
 	ganesha_challenge_attach(who);
 	who->require_hook(At_Incarnate, #'ganesha_challenge_at_incarnate);
 }

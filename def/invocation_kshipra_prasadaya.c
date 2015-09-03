@@ -68,7 +68,7 @@ void configure() {
 		} else {
 			object aura = new(Travelers_Misc("brahmanda-prakasa"));
             unless(aura->personal_enchantment_initialize(who, sonority))
-                aura->remove();
+                safe_destruct(aura);
 		}
 		return;
 	:));

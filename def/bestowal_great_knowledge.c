@@ -33,6 +33,8 @@ void configure() {
 			object def = Skill(skill);
 			if(def->query_skill_class() == Skill_Class_Divine)
 				continue;
+			if(def->query_skill_require_ability() && !who->query_skill_known(skill))
+				continue;
 			switch(def->query_skill_pedagogy()) {
 			case Skill_Pedagogy_Intellectual    :
 				skills += ({ skill, skill });

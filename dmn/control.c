@@ -1,8 +1,8 @@
-#include <Travelers.h>
-#include <daemon.h>
-#include <alignment.h>
 #include <Empathic_Bonds.h>
+#include <Travelers.h>
+#include <alignment.h>
 #include <bond.h>
+#include <daemon.h>
 
 inherit "/std/daemon";
 inherit "/mod/daemon/affiliation";
@@ -34,6 +34,10 @@ string travelers_join(object who, object ctl, object how) {
 		disallowed_worships = map(disallowed_worships, (: capitalize_words($1) :));
 		return "You cannot be a devotee of Ganesha while you worship " + list_array(disallowed_worships, "or") + ".";
 	}
+	if(who->query_affiliation("the Kazarzeth"))
+	    return "You cannot be a devotee of Ganesha while serving a Kazar demon.";
+	if(who->query_affiliation("Kazarak"))
+	    return "Kazar demons are among the few not welcome to walk with Ganesha for any reason.";
 	int challenge_time = who->query_info("Ganesha_Challenge_Overcame");
 	if(!challenge_time)
 		return "You wish to be a devotee of the remover and placer of obstacles?  Prove it.  Overcome one of Ganesha's obstacles.  You "
@@ -48,7 +52,7 @@ string travelers_join(object who, object ctl, object how) {
 void travelers_new_member(object who, object ctl, object how) {
 	object rep = how->affiliation_representative();
 	if(who->query_info("Travelers_Left")) {
-		rep->init_command("say Excellent!  Ganesha welcomes you back.", Command_Flags_System);
+		rep->init_command("say Excellent!  Ganesha welcomes you back. to " + which(who, rep));
 		foreach(int attr : Basic_Attributes)
 			who->add_permanent_attribute_adjustment(attr, 10);
 		who->display(([
@@ -59,10 +63,10 @@ void travelers_new_member(object who, object ctl, object how) {
 		]));
 		who->remove_info("Travelers_Left");
 		who->remove_info("Travelers_Left_Time");
-		rep->init_command("traveler " + who->query_full_name() + " has returned to our fold.", Command_Flags_System);
+		rep->init_command("traveler " + who->query_full_name() + " has returned to our fold.");
 	} else {
-		rep->init_command("say Excellent!  May your journeys be long and enlightening.", Command_Flags_System);
-		rep->init_command("traveler " + who->query_full_name() + " has joined our fold.", Command_Flags_System);
+		rep->init_command("say Excellent!  May your journeys be long and enlightening. to " + which(who, rep));
+		rep->init_command("traveler " + who->query_full_name() + " has joined our fold.");
 	}
 	log_file("dev/twilight.travelers", ctime() + ": " + printable(who) + " joined");
 }
@@ -179,7 +183,7 @@ void configure() {
 			Skill_Angrak,
 			Skill_Assarith,
 			Skill_Dazask,
-			Skill_Esperanto,
+			Skill_Tezhuatl,
 			Skill_Lingua_Manu,
 			Skill_Nilasnai,
 		}),
@@ -193,7 +197,6 @@ void configure() {
 			Skill_Dethek,
 			Skill_Kyotsugo,
 			Skill_Sperethiel,
-			Skill_Theran,
 			Skill_Xhax,
 		}),
 		Specialty_Degree      : 3,
@@ -205,7 +208,7 @@ void configure() {
 			Skill_Cilaghai,
 			Skill_Enochian,
 			Skill_Graecan,
-			Skill_Latin,
+			Skill_Caladan,
 			Skill_Thari,
 			Skill_Sumerian,
 		}),
@@ -285,8 +288,10 @@ void configure() {
 	]));
 	add_affiliation_specialty(([
 		Specialty_Skills      : ({
+			Skill_Antagonism,
 			Skill_Arcane_Lore,
 			Skill_Astrology,
+			Skill_Athleticism,
 			Skill_Balance,
 			Skill_Break_Fall,
 			Skill_Climbing,
@@ -315,7 +320,7 @@ void configure() {
 	]));
 	add_affiliation_specialty(([
 		Specialty_Skills      : ({
-			Skill_Armour_Adaptation,
+			Skill_Armour_Use,
 			Skill_Somatesthesia,
 			Skill_Breath_Control,
 			Skill_Carousing,
@@ -324,11 +329,13 @@ void configure() {
 			Skill_Elder_Lore,
 			Skill_Fast_Talk,
 			Skill_Finance,
+			Skill_Firefighting,
 			Skill_Flight,
 			Skill_History,
 			Skill_Leadership,
 			Skill_Philosophy,
 			Skill_Picking_Pockets,
+			Skill_Piety,
 			Skill_Psychology,
 			Skill_Quickness,
 			Skill_Subordination,

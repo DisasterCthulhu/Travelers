@@ -1,6 +1,6 @@
+#include <Travelers.h>
 #include <daemon.h>
 #include <experience.h>
-#include <Travelers.h>
 
 inherit Travelers_Definition("Requirement");
 
@@ -8,6 +8,10 @@ void travelers_requirement_experience_at_experience_change(mapping info) {
 	object who = info["who"];
 	int exp = info["experience"];
 	object challenge = Travelers_Find_Challenge(who);
+	if(!challenge) {
+		requirement_disengage_hooks(who);
+		return;
+	}
 	int gained = challenge->query_info("Experience_Gained");
 	gained += exp;
 	if(gained >= challenge->query_info("Experience_Required")) {

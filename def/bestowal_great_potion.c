@@ -1,13 +1,13 @@
+#include <Catelii.h>
 #include <Travelers.h>
 #include <daemon.h>
-#include <Catelii.h>
 
 inherit Travelers_Definition("Bestowal");
 
 internal mixed potions;
 
 mixed bestowal_potions() {
-    mixed out = bestowal_find_safe_master_items(LS_Potion("great_"), Item_Category_Comestible | Item_Category_Drink | Item_Category_Magical);
+    mixed out = bestowal_find_safe_items(Effect_Class_Great, Item_Category_Comestible | Item_Category_Drink | Item_Category_Magical);
     out += ({
         LS_Potion("heroism"),
         Catelii_Comestible("metacognition_potion"),

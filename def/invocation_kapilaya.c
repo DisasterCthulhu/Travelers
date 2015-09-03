@@ -117,6 +117,7 @@ void configure() {
 			Message_Senses          : Message_Sense_Astral,
 		]));
 		katakacha->katakacha_set_weapon_type(who, def->query_weapon_type_code());
+		who->validate_equipment_usage();
 		return;
 	:));
 }

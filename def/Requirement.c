@@ -1,235 +1,237 @@
 #include <Travelers.h>
 #include <daemon.h>
 
-private mapping requirement;
-private closure requirement_attach;
-private closure requirement_detach;
-private closure requirement_overcome;
-private closure requirement_initialize;
-
 inherit Travelers_Definition("Challenge_Component");
 
-void preinit() {
-	::preinit();
-	requirement ||= ([]);
-}
+nosave private string modifier_tag;
+private closure attach_process;
+private closure detach_process;
+private closure initialize_process;
+private closure overcome_process;
+private descriptor eligibility_condition;
+private descriptor initialize_display;
+private descriptor overcome_display;
+private int rarity;
+private int value;
+private mapping hooks;
+private status suspendable;
+private string initialize_description;
+private string name;
+private string overcome_description;
 
 void configure() {
 	::configure();
 	set_broker(Travelers_Daemon("dharma"));
 }
 
-void set_requirement_name(string name) {
-	requirement["name"] = name;
+protected nomask void set_requirement_name(string val) {
+	name = val;
 }
 
-string query_requirement_name() {
-	return requirement["name"];
+nomask string query_requirement_name() {
+	return name;
 }
 
-string query_challenge_component_name() {
-    return requirement["name"];
+nomask string query_challenge_component_name() {
+    return name;
 }
 
-void set_requirement_rarity(int rarity) {
-	requirement["rarity"] = rarity;
+protected nomask void set_requirement_rarity(int val) {
+	rarity = val;
 }
 
-int query_requirement_rarity() {
-	return requirement["rarity"];
+nomask int query_requirement_rarity() {
+	return rarity;
 }
 
-void set_requirement_value(int value) {
-	requirement["value"] = value;
+protected nomask void set_requirement_value(int val) {
+	value = val;
 }
 
-int query_requirement_value() {
-	return requirement["value"];
+nomask int query_requirement_value() {
+	return value;
 }
 
-void set_requirement_initialize_description(string description) {
-	requirement["initialize_description"] = description;
+protected nomask void set_requirement_initialize_description(string val) {
+	initialize_description = val;
 }
 
-string query_requirement_initialize_description() {
-	return requirement["initialize_description"];
+nomask string query_requirement_initialize_description() {
+	return initialize_description;
 }
 
-void set_requirement_overcome_description(string description) {
-	requirement["overcome_description"] = description;
+protected nomask void set_requirement_suspendable(status val) {
+	suspendable = val;
 }
 
-string query_requirement_overcome_description() {
-	return requirement["overcome_description"];
+nomask status query_requirement_suspendable() {
+	return suspendable;
 }
 
-void set_requirement_initialize_display(mixed display) {
-	requirement["initialize_display"] = Message(display);
+protected nomask void set_requirement_overcome_description(string val) {
+	overcome_description = val;
 }
 
-descriptor query_requirement_initialize_display() {
-	if(requirement["initialize_display"])
-		return requirement["initialize_display"];
-	else if(requirement["initialize_description"])
-		return Message(([
+nomask string query_requirement_overcome_description() {
+	return overcome_description;
+}
+
+protected nomask void set_requirement_initialize_display(mixed val) {
+	initialize_display = val && Message(val);
+}
+
+nomask descriptor query_requirement_initialize_display() {
+	if(initialize_display)
+		return initialize_display;
+	if(initialize_description)
+		return initialize_display = Message(([
 			Message_Content         : ({
 				0, ({ "sense", 0 }), "that this is an obstacle, a challenge provided by Ganesha,",
-				"that can be overcome by", requirement["initialize_description"],
+				"that can be overcome by", initialize_description,
 			}),
 			Message_Senses          : Message_Sense_Spiritual | Message_Sense_Cognitive,
 			Message_Color           : "status: risk",
 		]));
+	return 0;
 }
 
-void set_requirement_overcome_display(mixed display) {
-	requirement["overcome_display"] = Message(display);
+protected nomask void set_requirement_overcome_display(mixed val) {
+	overcome_display = val && Message(val);
 }
 
-descriptor query_requirement_overcome_display() {
-	if(requirement["overcome_display"])
-		return requirement["overcome_display"];
-	else if(requirement["overcome_description"])
-		return Message(([
+nomask descriptor query_requirement_overcome_display() {
+	if(overcome_display)
+		return overcome_display;
+	if(overcome_description)
+		return overcome_display = Message(([
 			Message_Content         : ({
-				0, ({ "sense", 0 }), "that", ({ 'p', 0 }), ({ "have", 0 }), requirement["overcome_description"],
+				0, ({ "sense", 0 }), "that", ({ 'p', 0 }), ({ "have", 0 }), overcome_description,
 				"to overcome Ganesha's obstacle",
 			}),
 			Message_Senses          : Message_Sense_Spiritual | Message_Sense_Cognitive,
 			Message_Color           : "status: safety",
 		]));
+	return 0;
 }
 
-void set_requirement_attach_process(closure cl) {
-	requirement_attach = cl;
+protected nomask void set_requirement_attach_process(closure cl) {
+	attach_process = cl;
 }
 
-closure query_requirement_attach_process() {
-	return requirement_attach;
+nomask closure query_requirement_attach_process() {
+	return attach_process;
 }
 
-void set_requirement_detach_process(closure cl) {
-	requirement_detach = cl;
+protected nomask void set_requirement_detach_process(closure cl) {
+	detach_process = cl;
 }
 
-closure query_requirement_detach_process() {
-	return requirement_detach;
+nomask closure query_requirement_detach_process() {
+	return detach_process;
 }
 
-void set_requirement_overcome_process(closure cl) {
-	requirement_overcome = cl;
+protected nomask void set_requirement_overcome_process(closure cl) {
+	overcome_process = cl;
 }
 
-closure query_requirement_overcome_process() {
-	return requirement_overcome;
+nomask closure query_requirement_overcome_process() {
+	return overcome_process;
 }
 
-void set_requirement_initialize_process(closure cl) {
-	requirement_initialize = cl;
+protected nomask void set_requirement_initialize_process(closure cl) {
+	initialize_process = cl;
 }
 
-closure query_requirement_initialize_process() {
-	return requirement_initialize;
+nomask closure query_requirement_initialize_process() {
+	return initialize_process;
 }
 
-string query_requirement_modifier_tag() {
-	return "Ganesha_Requirement_" + replace(capitalize_words(query_requirement_name()), " ", "_") + "_Mod";
+nomask string query_requirement_modifier_tag() {
+	return modifier_tag ||= "Ganesha_Requirement_" + replace(capitalize_words(query_requirement_name()), " ", "_") + "_Mod";
 }
 
-descriptor set_requirement_modifier_tag(descriptor dxr) {
-	Modifier_Set_Info(dxr, query_requirement_modifier_tag(), True);
+nomask void add_requirement_hook(int type, closure cl) {
+	hooks ||= ([]);
+	array_push(hooks[type], cl);
 }
 
-status has_requirement_modifier_tag(descriptor dxr) {
-	return Modifier_Query_Info(dxr, query_requirement_modifier_tag());
+nomask mapping query_requirement_hooks() {
+	return hooks;
 }
 
-void add_requirement_hook(int type, closure cl) {
-	requirement["hooks"] ||= ([]);
-	requirement["hooks"][type] ||= ({});
-	requirement["hooks"][type] += ({ cl });
+nomask void requirement_engage_hooks(object who) {
+	if(hooks)
+		foreach(int type, mixed array cls : hooks)
+			foreach(closure cl : cls)
+				Call_Hook_On(who, type, cl, Call_Flag_Nonpersistent);
 }
 
-mapping query_requirement_hooks() {
-	return requirement["hooks"] || ([]);
+nomask void requirement_disengage_hooks(object who) {
+	if(hooks)
+		foreach(int type, mixed array cls : hooks)
+			foreach(closure cl : cls)
+				Call_Hook_Off(who, type, cl, Call_Flag_Nonpersistent);
 }
 
-void engage_requirement_hooks(object who) {
-	foreach(int type, mixed array cls : query_requirement_hooks())
-		foreach(closure cl : cls)
-			Call_Hook_On(who, type, cl, Call_Flag_Nonpersistent);
-}
-
-void disengage_requirement_hooks(object who) {
-	foreach(int type, mixed array cls : query_requirement_hooks())
-		foreach(closure cl : cls)
-			Call_Hook_Off(who, type, cl, Call_Flag_Nonpersistent);
-}
-
-void requirement_attach(object obj) {
+nomask void requirement_attach(object obj) {
 	object who = obj->ganesha_challenge_query_owner();
-	if(requirement_attach)
-		funcall(requirement_attach, obj);
-	engage_requirement_hooks(who);
+	funcall(attach_process, obj);
+	requirement_engage_hooks(who);
 }
 
-void requirement_detach(object obj) {
+nomask void requirement_detach(object obj) {
 	object who = obj->ganesha_challenge_query_owner();
-	if(requirement_detach)
-		funcall(requirement_detach, obj);
-	disengage_requirement_hooks(who);
+	funcall(detach_process, obj);
+	requirement_disengage_hooks(who);
 }
 
-void requirement_initialize(object obj) {
+// temporary compat, if you're reading this delete this function
+nomask void detach_process(object obj) {
+	requirement_detach(obj);
+}
+
+nomask void requirement_initialize(object obj) {
 	object who = obj->ganesha_challenge_query_owner();
-	if(requirement_initialize)
-		funcall(requirement_initialize, obj);
+	funcall(initialize_process, obj);
 	descriptor display = query_requirement_initialize_display();
 	if(display)
 		who->display(display);
 }
 
-void requirement_overcome(object obj) {
+nomask void requirement_overcome(object obj) {
 	object who = obj->ganesha_challenge_query_owner();
-	if(requirement_overcome)
-		funcall(requirement_overcome, obj);
+	funcall(overcome_process, obj);
 	descriptor display = query_requirement_overcome_display();
 	if(display)
 		who->display(display);
 }
 
-void requirement_yield(object obj) {
+nomask void requirement_yield(object obj) {
 	object who = obj->ganesha_challenge_query_owner();
-	if(requirement_overcome)
-		funcall(requirement_overcome, obj);
+	funcall(overcome_process, obj);
 }
 
-void requirement_fail(object obj) {
+nomask void requirement_fail(object obj) {
 	object who = obj->ganesha_challenge_query_owner();
-	if(requirement_overcome)
-		funcall(requirement_overcome, obj);
+	funcall(overcome_process, obj);
 }
 
-void set_requirement_eligibility_condition(mixed cond) {
-	descriptor use;
-	if(Is_Condition(cond))
-		use = cond;
-	else
-		use = Condition(cond);
-	requirement["eligibility_condition"] = use;
+protected nomask void set_requirement_eligibility_condition(mixed cond) {
+	if(!Is_Condition(cond))
+		cond = Condition(cond);
+	eligibility_condition = cond;
 }
 
-descriptor query_requirement_eligibility_condition() {
-	return requirement["eligibility_condition"];
+nomask descriptor query_requirement_eligibility_condition() {
+	return eligibility_condition;
 }
 
-status query_requirement_eligibility(object who) {
+nomask status query_requirement_eligibility(object who) {
 	descriptor cond = query_requirement_eligibility_condition();
-	unless(cond)
-		return True;
-	return Condition_Apply(cond, who, 0);
+	return !cond || Condition_Apply(cond, who, 0);
 }
 
-void requirement_check_notification(object challenge, mixed current_value, string low_value, string high_value) {
+nomask void requirement_check_notification(object challenge, mixed current_value, string low_value, string high_value) {
 	object who = challenge->ganesha_challenge_query_owner();
 	mixed low = low_value ? challenge->query_info(low_value) : 0;
 	mixed high = challenge->query_info(high_value);
@@ -240,16 +242,10 @@ void requirement_check_notification(object challenge, mixed current_value, strin
 		challenge->set_info("Last_Requirement_Notification", current);
 		who->display(([
 			Message_Content         : ({
-				'j', "{{status: safety}",
-				0, ({ "sense", 0 }), "that you have completed " + printable(current) + "% of", 'j', ({ 'r', 0, "challenge" }),
-				"}"
+				0, ({ "sense", 0 }), "that you have completed " + printable(current) + "% of", ({ 'r', 0, "challenge" }),
 			}),
 			Message_Senses          : Message_Sense_Cognitive,
+			Message_Color           : "status: safety",
 		]));
 	}
-}
-
-void taboo_violation(object who) {
-    object challenge = Travelers_Find_Challenge(who);
-    challenge->ganesha_challenge_fail();
 }

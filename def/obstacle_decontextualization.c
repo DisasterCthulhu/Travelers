@@ -5,7 +5,7 @@
 
 inherit Travelers_Definition("Obstacle");
 
-void traveler_obstacle_decontextualization_do_autoheal(object who) {
+void traveler_obstacle_decontextualization_at_autoheal(object who) {
 	unless(!random(20))
 		return;
 	if(who->query_attacker() && !random(2))
@@ -69,7 +69,7 @@ void configure() {
 		Message_Color                               : "status: loss",
 		Message_Senses                              : Message_Sense_Cognitive,
 	]));
-	add_obstacle_hook(Do_Autoheal, #'traveler_obstacle_decontextualization_do_autoheal);
+	add_obstacle_hook(At_Autoheal, #'traveler_obstacle_decontextualization_at_autoheal);
 	set_obstacle_overcome_display(([
 		Message_Content                             : ({
 			({ 's', 0, "sense of disorientation" }), "fades, leaving", ({ 'o', 0 }), "feeling firmly grounded once more",

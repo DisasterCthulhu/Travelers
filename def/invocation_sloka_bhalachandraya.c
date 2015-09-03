@@ -14,8 +14,7 @@ void configure() {
 	);
 	set_invocation_help(
 	    "This invocation allows one to set a divine waypoint, a powerful marker for one's travels.  These waypoints "
-	    "require the direct intervention of Ganesha, bypassing the potentially laborious task of conceptual navigation, "
-	    "and overriding almost any enchantment preventing translocation."
+	    "require the direct intervention of Ganesha, bypassing the potentially laborious task of conceptual navigation."
 	);
 	set_invocation_cost(({
 		({ Energy_Spiritual, 1000 })

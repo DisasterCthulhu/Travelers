@@ -31,11 +31,14 @@ void configure() {
 		int array skills = ({});
 		foreach(int skill : who->query_skills()) {
 			object def = Skill(skill);
+			if(def->query_skill_require_ability() && !who->query_skill_known(skill))
+				continue;
 			switch(def->query_skill_pedagogy()) {
 			case Skill_Pedagogy_Body_Alteration     :
 			case Skill_Pedagogy_Spirit_Alteration   :
 				if(def->query_skill_class() != Skill_Class_Divine)
-					skills += ({ skill });
+				    if(skill != Skill_Qlippotic_Affinity)
+					    skills += ({ skill });
 				break;
 			}
 		}

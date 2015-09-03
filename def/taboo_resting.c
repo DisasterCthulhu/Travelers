@@ -8,7 +8,7 @@ inherit Travelers_Definition("Taboo");
 void travelers_taboo_resting_do_begin_process(mapping args) {
     object who = args["who"];
     descriptor process = args["process"];
-    if(!Process_Query_Info(process, "System_Resting_Process"))
+    if(Process_Query(process, Process_Type) != Process_Type_Resting)
         return;
     object challenge = Travelers_Find_Challenge(who);
     taboo_violation(challenge);
