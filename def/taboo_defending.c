@@ -18,12 +18,12 @@ void travelers_taboo_defending_do_dodge(descriptor dxr) {
 }
 
 void configure() {
-	::configure();
-	set_taboo_name("defending");
-	set_taboo_rarity(Rarity_Rare);
-	set_taboo_value(Travelers_Taboo_Value_High);
-	set_taboo_initialize_description("defending attacks by dodging them, parrying them, or otherwise deflecting them");
-	set_taboo_overcome_description("defending");
+    ::configure();
+    set_taboo_name("defending");
+    set_taboo_rarity(Rarity_Rare);
+    set_taboo_value(Travelers_Taboo_Value_High);
+    set_taboo_initialize_description("defending attacks by dodging them, parrying them, or otherwise deflecting them");
+    set_taboo_overcome_description("defending");
     set_challenge_component_selection_adjustments(([
         "charity"                               : 0.10,
         "experience"                            : 1.25,
@@ -33,6 +33,6 @@ void configure() {
         "skill experience"                      : 0.10,
         "neophyte guidance"                     : 0.50,
     ]));
-	add_taboo_hook(Do_Deflect, #'travelers_taboo_defending_do_deflect);
-	add_taboo_hook(Do_Dodge, #'travelers_taboo_defending_do_dodge);
+    add_taboo_hook(Do_Deflect, #'travelers_taboo_defending_do_deflect);
+    add_taboo_hook(Do_Dodge, #'travelers_taboo_defending_do_dodge);
 }

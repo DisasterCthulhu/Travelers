@@ -15,12 +15,12 @@ void travelers_taboo_slaying_the_orderly_at_kill(mapping args) {
 }
 
 void configure() {
-	::configure();
-	set_taboo_name("slaying the orderly");
-	set_taboo_rarity(Rarity_Unusual);
-	set_taboo_value(Travelers_Taboo_Value_Low);
-	set_taboo_initialize_description("participating in the killing of anyone of ordered alignment");
-	set_taboo_overcome_description("slaying the orderly");
+    ::configure();
+    set_taboo_name("slaying the orderly");
+    set_taboo_rarity(Rarity_Unusual);
+    set_taboo_value(Travelers_Taboo_Value_Low);
+    set_taboo_initialize_description("participating in the killing of anyone of ordered alignment");
+    set_taboo_overcome_description("slaying the orderly");
     set_challenge_component_selection_adjustments(([
         "charity"                               : 0.05,
         "experience"                            : 1.25,
@@ -30,5 +30,5 @@ void configure() {
         "skill experience"                      : 0.05,
         "neophyte guidance"                     : 0.05,
     ]));
-	add_taboo_hook(At_Kill, #'travelers_taboo_slaying_the_orderly_at_kill);
+    add_taboo_hook(At_Kill, #'travelers_taboo_slaying_the_orderly_at_kill);
 }

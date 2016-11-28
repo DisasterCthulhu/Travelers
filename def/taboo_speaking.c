@@ -14,17 +14,17 @@ void travelers_taboo_speaking_do_speak(descriptor dxr) {
 }
 
 void configure() {
-	::configure();
-	set_taboo_name("speaking");
-	set_taboo_rarity(Rarity_Very_Unusual);
-	set_taboo_value(Travelers_Taboo_Value_High);
+    ::configure();
+    set_taboo_name("speaking");
+    set_taboo_rarity(Rarity_Very_Unusual);
+    set_taboo_value(Travelers_Taboo_Value_High);
     set_taboo_eligibility_condition(([
         Condition_Type_Code                     : Condition_Type_Trait,
         Condition_Info                          : Trait_Muteness,
         Condition_Flags                         : Condition_Flag_Inverse,
     ]));
-	set_taboo_initialize_description("speaking");
-	set_taboo_overcome_description("speaking");
+    set_taboo_initialize_description("speaking");
+    set_taboo_overcome_description("speaking");
     set_challenge_component_selection_adjustments(([
         "celebration"                           : 0.00,
         "charity"                               : 0.50,
@@ -40,5 +40,5 @@ void configure() {
         "muteness"                              : 0.00,
         "deafness"                              : 0.25,
     ]));
-	add_taboo_hook(Do_Speak, #'travelers_taboo_speaking_do_speak);
+    add_taboo_hook(Do_Speak, #'travelers_taboo_speaking_do_speak);
 }

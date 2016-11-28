@@ -12,12 +12,12 @@ void travelers_taboo_dodging_do_dodge(descriptor dxr) {
 }
 
 void configure() {
-	::configure();
-	set_taboo_name("dodging");
-	set_taboo_rarity(Rarity_Unusual);
-	set_taboo_value(Travelers_Taboo_Value_Very_Low);
-	set_taboo_initialize_description("evading attacks by dodging them");
-	set_taboo_overcome_description("dodging");
+    ::configure();
+    set_taboo_name("dodging");
+    set_taboo_rarity(Rarity_Unusual);
+    set_taboo_value(Travelers_Taboo_Value_Very_Low);
+    set_taboo_initialize_description("evading attacks by dodging them");
+    set_taboo_overcome_description("dodging");
     set_challenge_component_selection_adjustments(([
         "charity"                               : 0.10,
         "experience"                            : 1.00,
@@ -27,5 +27,5 @@ void configure() {
         "skill experience"                      : 0.10,
         "neophyte guidance"                     : 0.50,
     ]));
-	add_taboo_hook(Do_Dodge, #'travelers_taboo_dodging_do_dodge);
+    add_taboo_hook(Do_Dodge, #'travelers_taboo_dodging_do_dodge);
 }

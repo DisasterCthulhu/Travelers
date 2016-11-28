@@ -6,12 +6,12 @@
 inherit Travelers_Definition("Taboo");
 
 void configure() {
-	::configure();
-	set_taboo_name("yielding");
-	set_taboo_rarity(Rarity_Unusual);
-	set_taboo_value(Travelers_Taboo_Value_Moderate);
-	set_taboo_initialize_description("yielding to this challenge");
-	set_taboo_overcome_description("yielding");
+    ::configure();
+    set_taboo_name("yielding");
+    set_taboo_rarity(Rarity_Unusual);
+    set_taboo_value(Travelers_Taboo_Value_Moderate);
+    set_taboo_initialize_description("yielding to this challenge");
+    set_taboo_overcome_description("yielding");
     set_challenge_component_selection_adjustments(([
         "charity"                               : 0.50,
         "experience"                            : 1.00,

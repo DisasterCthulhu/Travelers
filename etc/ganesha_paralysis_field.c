@@ -6,7 +6,7 @@ inherit "/std/app/personal_enchantment";
 nosave private descriptor paralysis_mod;
 
 status is_ganesha_paralysis_field() {
-	return True;
+    return True;
 }
 
 varargs void ganesha_paralysis_paralyze(object who) {
@@ -46,12 +46,12 @@ void ganesha_paralysis_field_at_start_combat(object who) {
 }
 
 void configure() {
-	::configure();
-	alter_identity(Identity_Type, Identity_Type_Custom);
-	alter_identity(Identity_Adjectives, ({ "faint" }));
-	alter_identity(Identity_Nouns, ({ "breeze" }));
-	alter_identity(Identity_Special_Names, ({ "GANESHA_PARALYSIS_FIELD" }), True);
-	set_short(0);
+    ::configure();
+    alter_identity(Identity_Type, Identity_Type_Custom);
+    alter_identity(Identity_Adjectives, ({ "faint" }));
+    alter_identity(Identity_Nouns, ({ "breeze" }));
+    alter_identity(Identity_Special_Names, ({ "GANESHA_PARALYSIS_FIELD" }), True);
+    set_short(0);
     personal_enchantment_set_mod_description(([
         Description_Type                                : Description_Type_Viewer_Condition,
         Description_Index                               : Condition(Condition_Type_Hearing),
@@ -79,27 +79,27 @@ void configure() {
             #'ganesha_paralysis_field_at_start_combat,
         }),
     }));
-	armour()->set_armour_type(Armour_Type_Aura);
-	armour()->set_race("human");
-	armour()->set_ablative(False);
-	set_indestructible(True);
-	add_proportion(([
-		Element_Type                                    : Material_Air,
-		Element_Proportion                              : 1.000,
-	]));
-	add_proportion(([
-		Element_Type                                    : Material_Mana,
-		Element_Proportion                              : 0.150,
-		Element_Flags                                   : Element_Flag_Secondary,
-	]));
-	add_proportion(([
-		Element_Type                                    : Material_Shekhinah,
-		Element_Proportion                              : 0.001,
-		Element_Flags                                   : Element_Flag_Secondary,
-	]));
-	add_hook(At_Start_Combat, #'ganesha_paralysis_field_at_start_combat);
-	set_suppress_condition_display(True);
-	set_suppress_size_display(True);
-	set_suppress_weight_display(True);
-	set_value(0);
+    armour()->set_armour_type(Armour_Type_Aura);
+    armour()->set_race("human");
+    armour()->set_ablative(False);
+    set_indestructible(True);
+    add_proportion(([
+        Element_Type                                    : Material_Air,
+        Element_Proportion                              : 1.000,
+    ]));
+    add_proportion(([
+        Element_Type                                    : Material_Mana,
+        Element_Proportion                              : 0.150,
+        Element_Flags                                   : Element_Flag_Secondary,
+    ]));
+    add_proportion(([
+        Element_Type                                    : Material_Shekhinah,
+        Element_Proportion                              : 0.001,
+        Element_Flags                                   : Element_Flag_Secondary,
+    ]));
+    add_hook(At_Start_Combat, #'ganesha_paralysis_field_at_start_combat);
+    set_suppress_condition_display(True);
+    set_suppress_size_display(True);
+    set_suppress_weight_display(True);
+    set_value(0);
 }

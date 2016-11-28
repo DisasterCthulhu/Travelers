@@ -6,26 +6,26 @@
 inherit Travelers_Definition("Bestowal");
 
 void configure() {
-	::configure();
-	set_bestowal_name("wild talent");
-	set_bestowal_type(Travelers_Bestowal_Type_Singular);
-	set_bestowal_rarity(Rarity_Very_Exotic);
-	set_bestowal_universality(True);
-	set_bestowal_value(Travelers_Bestowal_Value_Very_High);
-	set_bestowal_description("a wild talent");
-	set_bestowal_eligibility_condition(([
-	    Condition_Type_Code                     : Condition_Type_And,
-	    Condition_Info                          : ({
-	        ([
-		        Condition_Type_Code             : Condition_Type_Psychic_Race,
-		    ]),
-	        ([
-		        Condition_Type_Code             : Condition_Type_Metric,
-		        Condition_Info                  : "karma phala",
-		        Condition_Value                 : 1000,
-		    ]),
-		}),
-	]));
+    ::configure();
+    set_bestowal_name("wild talent");
+    set_bestowal_type(Travelers_Bestowal_Type_Singular);
+    set_bestowal_rarity(Rarity_Very_Exotic);
+    set_bestowal_universality(True);
+    set_bestowal_value(Travelers_Bestowal_Value_Very_High);
+    set_bestowal_description("a wild talent");
+    set_bestowal_eligibility_condition(([
+        Condition_Type_Code                     : Condition_Type_And,
+        Condition_Info                          : ({
+            ([
+                Condition_Type_Code             : Condition_Type_Psychic_Race,
+            ]),
+            ([
+                Condition_Type_Code             : Condition_Type_Metric,
+                Condition_Info                  : "karma phala",
+                Condition_Value                 : 1000,
+            ]),
+        }),
+    ]));
     set_bestowal_reward_process((:
         object who = $1;
         who->display(([

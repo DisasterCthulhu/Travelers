@@ -8,11 +8,11 @@
 inherit Travelers_Definition("Forfeit");
 
 void configure() {
-	::configure();
-	set_forfeit_name("regression");
-	set_forfeit_rarity(Rarity_Very_Unusual);
-	set_forfeit_value(Travelers_Forfeit_Value_High);
-	set_forfeit_initialize_description("regression to a less developed state");
+    ::configure();
+    set_forfeit_name("regression");
+    set_forfeit_rarity(Rarity_Very_Unusual);
+    set_forfeit_value(Travelers_Forfeit_Value_High);
+    set_forfeit_initialize_description("regression to a less developed state");
     set_forfeit_message(([
         Message_Content                         : ({
             'a',
@@ -34,13 +34,13 @@ void configure() {
         Message_Senses                          : Message_Sense_Spiritual | Message_Sense_Cognitive,
         Message_Color                           : "status: loss",
     ]));
-	set_forfeit_process((:
-	    object who = $1->ganesha_challenge_query_owner();
-	    int xp_loss = Experience_Reward(Effect_Class_Great, who);
-	    who->add_experience(-xp_loss, Add_Experience_Flag_Unsplit | Add_Experience_Flag_Suppress_Level_Adjustment | Add_Experience_Flag_Emotion);
+    set_forfeit_process((:
+        object who = $1->ganesha_challenge_query_owner();
+        int xp_loss = Experience_Reward(Effect_Class_Great, who);
+        who->add_experience(-xp_loss, Add_Experience_Flag_Unsplit | Add_Experience_Flag_Suppress_Level_Adjustment | Add_Experience_Flag_Emotion);
         int level = Experience_Level(who->query_experience());
         if(level < who->query_level())
             who->set_level(level);
         return;
-	:));
+    :));
 }

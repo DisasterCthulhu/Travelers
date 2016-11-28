@@ -12,12 +12,12 @@ void travelers_taboo_deflecting_do_deflect(descriptor dxr) {
 }
 
 void configure() {
-	::configure();
-	set_taboo_name("deflecting");
-	set_taboo_rarity(Rarity_Unusual);
-	set_taboo_value(Travelers_Taboo_Value_Very_Low);
-	set_taboo_initialize_description("deflecting attacks");
-	set_taboo_overcome_description("deflecting");
+    ::configure();
+    set_taboo_name("deflecting");
+    set_taboo_rarity(Rarity_Unusual);
+    set_taboo_value(Travelers_Taboo_Value_Very_Low);
+    set_taboo_initialize_description("deflecting attacks");
+    set_taboo_overcome_description("deflecting");
     set_challenge_component_selection_adjustments(([
         "charity"                               : 0.10,
         "experience"                            : 1.00,
@@ -27,5 +27,5 @@ void configure() {
         "skill experience"                      : 0.10,
         "neophyte guidance"                     : 0.50,
     ]));
-	add_taboo_hook(Do_Deflect, #'travelers_taboo_deflecting_do_deflect);
+    add_taboo_hook(Do_Deflect, #'travelers_taboo_deflecting_do_deflect);
 }

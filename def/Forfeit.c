@@ -7,21 +7,21 @@ private closure forfeit_process;
 inherit Travelers_Definition("Challenge_Component");
 
 void preinit() {
-	::preinit();
-	forfeit ||= ([]);
+    ::preinit();
+    forfeit ||= ([]);
 }
 
 void configure() {
-	::configure();
-	set_broker(Travelers_Daemon("dharma"));
+    ::configure();
+    set_broker(Travelers_Daemon("dharma"));
 }
 
 void set_forfeit_name(string name) {
-	forfeit["name"] = name;
+    forfeit["name"] = name;
 }
 
 string query_forfeit_name() {
-	return forfeit["name"];
+    return forfeit["name"];
 }
 
 string query_challenge_component_name() {
@@ -37,19 +37,19 @@ closure query_forfeit_process() {
 }
 
 void set_forfeit_rarity(int rarity) {
-	forfeit["rarity"] = rarity;
+    forfeit["rarity"] = rarity;
 }
 
 int query_forfeit_rarity() {
-	return forfeit["rarity"];
+    return forfeit["rarity"];
 }
 
 void set_forfeit_value(int value) {
-	forfeit["value"] = value;
+    forfeit["value"] = value;
 }
 
 int query_forfeit_value() {
-	return forfeit["value"];
+    return forfeit["value"];
 }
 
 void set_forfeit_message(mixed message) {
@@ -69,37 +69,37 @@ descriptor query_forfeit_display() {
 }
 
 void set_forfeit_initialize_description(string description) {
-	forfeit["initialize_description"] = description;
+    forfeit["initialize_description"] = description;
 }
 
 string query_forfeit_initialize_description() {
-	return forfeit["initialize_description"];
+    return forfeit["initialize_description"];
 }
 
 void set_forfeit_overcome_description(string description) {
-	forfeit["overcome_description"] = description;
+    forfeit["overcome_description"] = description;
 }
 
 string query_forfeit_overcome_description() {
-	return forfeit["overcome_description"];
+    return forfeit["overcome_description"];
 }
 
 void set_forfeit_initialize_display(mixed display) {
-	forfeit["initialize_display"] = Message(display);
+    forfeit["initialize_display"] = Message(display);
 }
 
 descriptor query_forfeit_initialize_display() {
-	if(forfeit["initialize_display"])
-		return forfeit["initialize_display"];
-	else if(forfeit["initialize_description"])
-		return Message(([
-			Message_Content         : ({
-			    0, ({ "sense", 0 }), "that if", ({ 'p', 0 }), ({ "violate", 0 }), "this taboo,", ({ 'r', 0, "forfeit" }), "will be",
-			    forfeit["initialize_description"]
-			}),
-			Message_Senses          : Message_Sense_Spiritual | Message_Sense_Cognitive,
-			Message_Color           : "status: risk",
-		]));
+    if(forfeit["initialize_display"])
+        return forfeit["initialize_display"];
+    else if(forfeit["initialize_description"])
+        return Message(([
+            Message_Content         : ({
+                0, ({ "sense", 0 }), "that if", ({ 'p', 0 }), ({ "violate", 0 }), "this taboo,", ({ 'r', 0, "forfeit" }), "will be",
+                forfeit["initialize_description"]
+            }),
+            Message_Senses          : Message_Sense_Spiritual | Message_Sense_Cognitive,
+            Message_Color           : "status: risk",
+        ]));
 }
 
 void forfeit_initialize(object obj) {
@@ -122,25 +122,25 @@ void forfeit_fail(object obj) {
         who->message(forfeit["message"]);
     if(forfeit["display"])
         who->display(forfeit["display"]);
-	funcall(forfeit_process, obj);
+    funcall(forfeit_process, obj);
 }
 
 void set_forfeit_eligibility_condition(mixed cond) {
-	descriptor use;
-	if(Is_Condition(cond))
-		use = cond;
-	else
-		use = Condition(cond);
-	forfeit["eligibility_condition"] = use;
+    descriptor use;
+    if(Is_Condition(cond))
+        use = cond;
+    else
+        use = Condition(cond);
+    forfeit["eligibility_condition"] = use;
 }
 
 descriptor query_forfeit_eligibility_condition() {
-	return forfeit["eligibility_condition"];
+    return forfeit["eligibility_condition"];
 }
 
 status query_forfeit_eligibility(object who) {
-	descriptor cond = query_forfeit_eligibility_condition();
-	unless(cond)
-		return True;
-	return Condition_Apply(cond, who, 0);
+    descriptor cond = query_forfeit_eligibility_condition();
+    unless(cond)
+        return True;
+    return Condition_Apply(cond, who, 0);
 }

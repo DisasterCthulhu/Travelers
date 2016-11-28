@@ -96,7 +96,7 @@ status traveler_obstacle_flight_proscription_can_have_limb_restored(mapping args
         return Error(({
             "a powerful force prevents", who, "from having", ({ 'r', who, limb }), "restored",
         }));
-	return True;
+    return True;
 }
 
 status traveler_obstacle_flight_proscription_can_mount(mapping args) {
@@ -126,54 +126,54 @@ void traveler_obstacle_flight_proscription_at_limb_added(mapping args) {
 }
 
 void configure() {
-	::configure();
-	set_obstacle_name("flight proscription");
-	set_obstacle_prepend_indefinite_article(True);
-	set_obstacle_rarity(Rarity_Very_Unusual);
-	set_obstacle_value(Travelers_Obstacle_Value_High);
-	set_challenge_component_selection_adjustments(([
-		"experience"                            : 0.00,
-		"exploration"                           : 2.50,
-		"pilgrimage"                            : 1.50,
-		"quest"                                 : 0.50,
-		"skill experience"                      : 0.00,
-		"charity"                               : 1.00,
-		"neophyte guidance"                     : 1.00,
-	]));
-	set_obstacle_initialize_display(([
-		Message_Content                         : ({
-			0, ({ "sense", 0 }), "a powerful force proscribing", ({ 'o', 0 }), "from flying and prescribing that", ({ 'o', 0 }),
-			"travel the world by", ({ 'r', 0, "own effort" }),
-		}),
-		Message_Senses                          : Message_Sense_Spiritual | Message_Sense_Cognitive,
-		Message_Color                           : "status: loss",
-	]));
+    ::configure();
+    set_obstacle_name("flight proscription");
+    set_obstacle_prepend_indefinite_article(True);
+    set_obstacle_rarity(Rarity_Very_Unusual);
+    set_obstacle_value(Travelers_Obstacle_Value_High);
+    set_challenge_component_selection_adjustments(([
+        "experience"                            : 0.00,
+        "exploration"                           : 2.50,
+        "pilgrimage"                            : 1.50,
+        "quest"                                 : 0.50,
+        "skill experience"                      : 0.00,
+        "charity"                               : 1.00,
+        "neophyte guidance"                     : 1.00,
+    ]));
+    set_obstacle_initialize_display(([
+        Message_Content                         : ({
+            0, ({ "sense", 0 }), "a powerful force proscribing", ({ 'o', 0 }), "from flying and prescribing that", ({ 'o', 0 }),
+            "travel the world by", ({ 'r', 0, "own effort" }),
+        }),
+        Message_Senses                          : Message_Sense_Spiritual | Message_Sense_Cognitive,
+        Message_Color                           : "status: loss",
+    ]));
     add_obstacle_trait_modifier(([
         Modifier_Index                          : ({
             Trait_Wingless_Flight,
         }),
         Modifier_Amount                         : -5000,
     ]));
-	add_obstacle_hook(Can_Have_Limb_Restored, #'traveler_obstacle_flight_proscription_can_have_limb_restored);
-	add_obstacle_hook(At_Limb_Added, #'traveler_obstacle_flight_proscription_at_limb_added);
-	add_obstacle_hook(Can_Move, #'traveler_obstacle_flight_proscription_can_move);
-	add_obstacle_hook(Can_Mount, #'traveler_obstacle_flight_proscription_can_mount);
-	set_obstacle_attach_process((:
-		object who = $1->ganesha_challenge_query_owner();
-		traveler_obstacle_flight_nullify_wings(who);
-		traveler_obstacle_flight_proscription_reject_mounts_and_carriers(who);
-		return;
-	:));
+    add_obstacle_hook(Can_Have_Limb_Restored, #'traveler_obstacle_flight_proscription_can_have_limb_restored);
+    add_obstacle_hook(At_Limb_Added, #'traveler_obstacle_flight_proscription_at_limb_added);
+    add_obstacle_hook(Can_Move, #'traveler_obstacle_flight_proscription_can_move);
+    add_obstacle_hook(Can_Mount, #'traveler_obstacle_flight_proscription_can_mount);
+    set_obstacle_attach_process((:
+        object who = $1->ganesha_challenge_query_owner();
+        traveler_obstacle_flight_nullify_wings(who);
+        traveler_obstacle_flight_proscription_reject_mounts_and_carriers(who);
+        return;
+    :));
     set_obstacle_overcome_process((:
         object who = $1->ganesha_challenge_query_owner();
         obstacle_disengage_hooks(who);
         traveler_obstacle_flight_proscription_restore_wings(who);
     :));
-	set_obstacle_overcome_display(([
-		Message_Content                         : ({
-			0, ({ "sense", 0 }), "the proscription against flying being lifted from", ({ 'o', 0 }),
-		}),
-		Message_Senses                          : Message_Sense_Spiritual | Message_Sense_Cognitive,
-		Message_Color                           : "status: enhancement",
-	]));
+    set_obstacle_overcome_display(([
+        Message_Content                         : ({
+            0, ({ "sense", 0 }), "the proscription against flying being lifted from", ({ 'o', 0 }),
+        }),
+        Message_Senses                          : Message_Sense_Spiritual | Message_Sense_Cognitive,
+        Message_Color                           : "status: enhancement",
+    ]));
 }

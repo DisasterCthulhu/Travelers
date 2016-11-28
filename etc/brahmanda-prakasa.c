@@ -1,4 +1,5 @@
 #include <Travelers.h>
+#include <colors.h>
 #include <die.h>
 #include <explore.h>
 #include <interval.h>
@@ -17,10 +18,11 @@ inherit "/std/app/personal_enchantment";
     "extropy",\
 })
 
-nosave private descriptor array chakra_resistances;
 nosave private descriptor array base_resistances;
+nosave private descriptor array chakra_resistances;
 nosave private descriptor life_support;
 nosave private descriptor light_adjustment;
+nosave private mixed array element_color_result;
 nosave private object chakra;
 nosave private object owner;
 nosave private object preferred_chakra;
@@ -197,10 +199,10 @@ string brahmanda_prakasa_query_color() {
     return Element_Query(find_element(Material_Dweomer), Element_Color);
 }
 
-private mixed brahmanda_prakasa_poll_element_color(mapping args) {
-    descriptor dxr = args["element"];
-    if(args["element"] == brahmanda_prakasa_query_owner_covering_element())
-        return ({ brahmanda_prakasa_query_color(), 5 });
+private mixed brahmanda_prakasa_poll_element_color(mixed event) {
+    descriptor element = mappingp(event) ? event["element"] : event[Poll_Element_Color_Event_Element];
+    if(element == brahmanda_prakasa_query_owner_covering_element())
+        return element_color_result ||= ({ brahmanda_prakasa_query_color(), 5 });
     return 0;
 }
 
@@ -213,13 +215,14 @@ varargs void brahmanda_prakasa_activate_passing_effect(object who) {
     mapping rec = Element_Record(who);
     string color = brahmanda_prakasa_query_color();
     who->add_hook(Poll_Element_Color, #'brahmanda_prakasa_poll_element_color);
-    Element_Record_Message(who, rec, ({
-        "{{" + color + "}luminous bubbles} swirl tightly around", who, ", and",
-    }), ({
-        "as", ({ 'p', who }), ({ "merge", who }), "with the energy"
-    }), ([
-        Message_Senses      : Message_Sense_Visual | Message_Sense_Astral,
-    ]));
+    if(rec)
+        Element_Record_Message(who, rec, ({
+            "{{" + color + "}luminous bubbles} swirl tightly around", who, ", and",
+        }), ({
+            "as", ({ 'p', who }), ({ "merge", who }), "with the energy"
+        }), ([
+            Message_Senses      : Message_Sense_Visual | Message_Sense_Astral,
+        ]));
 }
 
 varargs void brahmanda_prakasa_deactivate_passing_effect(object who) {
@@ -231,17 +234,19 @@ varargs void brahmanda_prakasa_deactivate_passing_effect(object who) {
     mapping rec = Element_Record(who);
     string color = brahmanda_prakasa_query_color();
     who->remove_hook(Poll_Element_Color, #'brahmanda_prakasa_poll_element_color);
-    Element_Record_Message(who, rec, 0, ({
-        "as a seeming {{" + color + "}infinity of luminous bubbles} pour outward from", ({ 'r', who, "body" }),
-    }), ([
-        Message_Senses      : Message_Sense_Visual | Message_Sense_Astral,
-    ]));
+    if(rec)
+        Element_Record_Message(who, rec, 0, ({
+            "as a seeming {{" + color + "}infinity of luminous bubbles} pour outward from", ({ 'r', who, "body" }),
+        }), ([
+            Message_Senses      : Message_Sense_Visual | Message_Sense_Astral,
+        ]));
 }
 
 void brahmanda_prakasa_update_passing_effect(object old_chakra, object new_chakra, string color) {
     object who = personal_enchantment_query_owner();
     mapping rec = Element_Record(who);
     alter_element(find_element(Material_Dweomer), Element_Color, color);
+    element_color_result = 0;
     mixed array pre_message;
     if(old_chakra && new_chakra)
         pre_message = ({
@@ -261,10 +266,11 @@ void brahmanda_prakasa_update_passing_effect(object old_chakra, object new_chakr
         pre_message = ({
             "bubbles of energy centered around", ({ 's', who, old_chakra }), "disperse, and",
         });
-    unless(old_chakra == new_chakra && (old_chakra || new_chakra))
-        Element_Record_Message(who, rec, pre_message, 0, ([
-            Message_Senses      : Message_Sense_Visual | Message_Sense_Astral,
-        ]));
+    if(rec)
+        unless(old_chakra == new_chakra && (old_chakra || new_chakra))
+            Element_Record_Message(who, rec, pre_message, 0, ([
+                Message_Senses      : Message_Sense_Visual | Message_Sense_Astral,
+            ]));
 }
 
 void brahmanda_prakasa_synchronize_with_chakra() {
@@ -559,7 +565,7 @@ int brahmanda_prakasa_mod_absorb_damage(mapping args) {
     if(usable > 0) {
         float amount = diminishing_returns(usable, 0.1);
         if(who->query_spell_points() >= amount) {
-            int detect_rating = who->query_average_effective_skill(({ Skill_Theurgy, Skill_Divination, Skill_Channeling }), ({}));
+            int detect_rating = who->query_average_effective_skill(({ Skill_Theurgy, Skill_Divination, Skill_Equilibrium }), ({}));
             if(random(detect_rating) > 400 - amount * 20)
                 who->display(([
                     Message_Content             : ({

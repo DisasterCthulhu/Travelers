@@ -13,19 +13,20 @@ mixed bestowal_potions() {
         Catelii_Comestible("metacognition_potion"),
         Catelii_Comestible("powercraft_potion"),
         Catelii_Comestible("spellcraft_potion"),
+        Catelii_Comestible("linguistic_cunning_potion"),
         Catelii_Comestible("revitalization_potion"),
     });
-	return out;
+    return out;
 }
 
 void configure() {
-	::configure();
-	set_bestowal_name("great potion");
-	set_bestowal_type(Travelers_Bestowal_Type_Recurring);
-	set_bestowal_rarity(Rarity_Very_Unusual);
-	set_bestowal_universality(True);
-	set_bestowal_value(Travelers_Bestowal_Value_Very_Low);
-	set_bestowal_description("a potion of great power");
+    ::configure();
+    set_bestowal_name("great potion");
+    set_bestowal_type(Travelers_Bestowal_Type_Recurring);
+    set_bestowal_rarity(Rarity_Very_Unusual);
+    set_bestowal_universality(True);
+    set_bestowal_value(Travelers_Bestowal_Value_Very_Low);
+    set_bestowal_description("a potion of great power");
     set_bestowal_eligibility_condition(([
         Condition_Type_Code                     : Condition_Type_Or,
         Condition_Flags                         : Condition_Flag_Inverse,
@@ -52,14 +53,14 @@ void configure() {
             ]),
         }),
     ]));
-	set_bestowal_reward_process((:
-		object who = $1;
-		string potion_blueprint = random_element(potions ||= bestowal_potions());
-		if(!potion_blueprint) {
-			warn("failed to select potion blueprint");
-			return;
-		}
-		bestowal_deliver(who, potion_blueprint);
-		return;
-	:));
+    set_bestowal_reward_process((:
+        object who = $1;
+        string potion_blueprint = random_element(potions ||= bestowal_potions());
+        if(!potion_blueprint) {
+            warn("failed to select potion blueprint");
+            return;
+        }
+        bestowal_deliver(who, potion_blueprint);
+        return;
+    :));
 }
