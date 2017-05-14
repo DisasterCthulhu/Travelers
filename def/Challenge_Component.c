@@ -4,7 +4,7 @@
 inherit "/std/definition";
 inherit "/mod/basic/credits";
 
-internal mapping adjustments;
+nosave private mapping adjustments;
 
 void set_challenge_component_selection_adjustments(mapping what) {
     adjustments = what;

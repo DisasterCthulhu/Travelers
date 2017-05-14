@@ -50,11 +50,11 @@ void configure() {
     alter_identity(Identity_Type, Identity_Type_Custom);
     alter_identity(Identity_Adjectives, ({ "faint" }));
     alter_identity(Identity_Nouns, ({ "breeze" }));
-    alter_identity(Identity_Special_Names, ({ "GANESHA_PARALYSIS_FIELD" }), True);
+    alter_identity(Identity_Special_Names, ({ "GANESHA_PARALYSIS_FIELD" }), Identity_Alter_Add);
     set_short(0);
     personal_enchantment_set_mod_description(([
         Description_Type                                : Description_Type_Viewer_Condition,
-        Description_Index                               : Condition(Condition_Type_Hearing),
+        Description_Index                               : Condition_Type_Hearing,
         Description_Content                             : ({
             ({ 'a', "%t" }), ({ "whisper", "%t" }), "in the", Description(Description_Type_Ambient_Medium_Colored_Name),
             "around", ({ 'o', "%o" }),

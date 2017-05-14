@@ -55,6 +55,8 @@ void configure() {
                 ({ "change", katakacha }), "forms",
             }));
         string arg = Process_Query_Info(dxr, "argument");
+        unless(arg)
+            return Error (({ "ask for what?" }));
         string orig = arg;
         if(begins_with(arg, "a ")) {
             arg = arg[2..sizeof(arg)];

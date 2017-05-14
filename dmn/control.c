@@ -119,6 +119,7 @@ void configure() {
     set_affiliation_aliases(({ "Travelers" }));
     set_affiliation_title("Traveler");
     set_affiliation_link(Travelers_Misc("link"));
+    set_affiliation_reporting_color("paisley");
     set_affiliation_worships(({
         "ganesha",
     }));
@@ -275,7 +276,7 @@ void configure() {
             Skill_Steadiness,
             Skill_Stealth,
             Skill_Sword,
-            Skill_Telesmatic_Weapon,
+            Skill_Wyrding,
             Skill_Throwing,
             Skill_Traps,
             Skill_Unarmed_Combat

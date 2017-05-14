@@ -622,7 +622,7 @@ void configure() {
     weapon()->set_weapon_type(Weapon_Type_Shard);
     weapon()->set_ablative(False);
     weapon()->set_discharge_skills(([
-        Skill_Telesmatic_Weapon                 : 1.0,
+        Skill_Wyrding                           : 1.0,
     ]));
     weapon()->set_discharge_vector(Vector_Mote);
     weapon()->set_discharges(False);

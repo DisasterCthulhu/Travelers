@@ -31,6 +31,10 @@ void travelers_convert_old_info() {
     Ganesha_Set_Karma_Phala(owner, old_logos);
 }
 
+mixed query_brahmanda_prakasa_performance_rating() {
+    return Travelers_Invocation("kshipra prasadaya")->query_invocation_sonority(owner);
+}
+
 string array travelers_query_conceptual_navigation_points() {
     return info["conceptual navigation points"] ||= ({});
 }
@@ -278,6 +282,62 @@ void travelers_do_hear(descriptor dxr) {
     }
 }
 
+void travelers_audit_bestowals() {
+    string array list = info["bestowals"];
+    if(!sizeof(list))
+        return;
+    mixed array removed = 0;
+    for(int ix = sizeof(list) - 1; ix >= 0; ix--) {
+        string name = list[ix];
+        if(!Is_Travelers_Bestowal(name)) {
+            list = list[..ix - 1] + list[ix + 1..];
+            array_push(removed, ({ name, ix }));
+            continue;
+        }
+        object def = Travelers_Bestowal(name);
+        if(name != def->query_bestowal_name())
+            list[ix] = def->query_bestowal_name();
+    }
+    string array invalidated = info["invalidated_bestowals"];
+    status any_restored = False;
+    if(invalidated) {
+        foreach(mixed array item : invalidated) {
+            string name = item[0];
+            int ix = item[1];
+            if(Is_Travelers_Bestowal(name)) {
+                invalidated -= ({ item });
+                if(ix < sizeof(list))
+                    list = list[..ix - 1] + ({ name }) + list[ix..];
+                else
+                    list += ({ name });
+                any_restored = True;
+            }
+        }
+        if(any_restored) {
+            if(sizeof(invalidated)) {
+                info["invalidated_bestowals"] = invalidated;
+            } else {
+                map_delete(info, "invalidated_bestowals");
+                invalidated = 0;
+            }
+        }
+    }
+    if(removed || any_restored) {
+        if(sizeof(list))
+            info["bestowals"] = list;
+        else
+            map_delete(info, "bestowals");
+        if(removed)
+            if(invalidated)
+                info["invalidated_bestowals"] = invalidated + removed;
+            else
+                info["invalidated_bestowals"] = removed;
+    }
+}
+
+string array travelers_query_invalidated_bestowals() {
+    return info["invalidated_bestowals"];
+}
 
 void configure() {
     ::configure();
@@ -291,6 +351,7 @@ void attach_affiliation(object who, mixed conf) {
     call_out("travelers_check_for_challenge_creator_benefits", 6);
     grant_channel(who, "traveler");
     owner->add_hook(Do_Hear, #'travelers_do_hear);
+    travelers_audit_bestowals();
     call_out("travelers_convert_old_info", 5);
 }
 
@@ -304,12 +365,18 @@ string stat() {
     string out = "\n";
     out += "{{orange}{{bright yellow}Travelers Status} ------------------------------------------------------------}\n";
     out += "{{red}Karma Phala             :} {{orange}" + Ganesha_Query_Karma_Phala(owner) + "}\n";
+    travelers_audit_bestowals();
     string array bestowals = travelers_query_bestowals();
     out += "{{red}Permanent Bestowals     :} ";
     if(!sizeof(bestowals))
         out += "{{black}none}\n";
     else
         out += "{{orange}" + sizeof(bestowals) + "}\n    {{yellow}" + implode(sort_array(bestowals, #'>), "\n    ") + "}\n";
+    string array inv_bestowals = travelers_query_invalidated_bestowals();
+    if(sizeof(inv_bestowals)) {
+        out += "{{red}Invalidated Bestowals   :} ";
+        out += "{{orange}" + sizeof(inv_bestowals) + "}\n    {{yellow}" + implode(sort_array(inv_bestowals, #'>), "\n    ") + "}\n";
+    }
     string array points = map(travelers_query_conceptual_navigation_point_rooms(), (:
         if(!$1)
             return "{{dark yellow}[unused point]}";

@@ -28,6 +28,7 @@ nosave private object owner;
 nosave private object preferred_chakra;
 nosave private status life_saving_subsequent;
 private float charge = 0.0;
+private float absorb_value = 0.0;
 private int duration;
 private status will_expire;
 
@@ -109,6 +110,18 @@ private status will_expire;
 
 status is_brahmanda_prakasa() {
     return True;
+}
+
+void process_post_restore(object who, record save, int restore_flags) {
+    ::process_post_restore(who, save, restore_flags);
+    if(sizeof(armour()->query_absorption_modifiers())) {
+        foreach(mixed modifier : armour()->query_absorption_modifiers())
+            armour()->remove_absorption_modifier(modifier);
+    }
+    if(personal_enchantment_query_unbound_armour())
+        personal_enchantment_set_unbound_armour(False);
+    if(armour()->query_field_effect())
+        armour()->set_field_effect(False);
 }
 
 descriptor brahmanda_prakasa_query_owner_covering_element() {
@@ -316,9 +329,9 @@ void brahmanda_prakasa_synchronize_with_chakra() {
 }
 
 mixed personal_enchantment_determine_effectiveness(object who, object target) {
-    unless(who && who->query_affiliation(project_control()))
+    unless(who)
         return 0;
-    return Travelers_Invocation("kshipra prasadaya")->query_invocation_sonority(who);
+    return who->affiliation_links_reduce((: max($1, $2->query_brahmanda_prakasa_performance_rating()) :));
 }
 
 varargs void brahmanda_prakasa_update(status force) {
@@ -335,17 +348,7 @@ varargs void brahmanda_prakasa_update(status force) {
     float universe_exploration_percentage_factor = scale_conversion(universe_exploration_percentage, 0.0, 1.0, 0.5, 1.0);
     effective_karma *= universe_exploration_percentage_factor;
     effective_karma *= personal_enchantment_query_effectiveness();
-    descriptor array candidates = armour()->query_absorption_modifiers();
-    if(sizeof(candidates))
-        foreach(descriptor candidate : candidates)
-            if(strstr(Modifier_Query(candidate, Modifier_Source), "brahmanda-prakasa") != Null)
-                armour()->remove_absorption_modifier(candidate);
-    float amount = diminishing_returns(effective_karma / 50, 20);
-    armour()->add_absorption_modifier(([
-        Modifier_Amount                         : amount,
-        Modifier_Flags                          : Modifier_Flag_Persistent,
-        Modifier_Bound                          : amount,
-    ]));
+    absorb_value = diminishing_returns(effective_karma / 50, 20);
     brahmanda_prakasa_synchronize_with_chakra();
 }
 
@@ -582,6 +585,7 @@ int brahmanda_prakasa_mod_absorb_damage(mapping args) {
     }
     if(Interval_Query(#'brahmanda_prakasa_assist) == Null)
         Interval_Set(#'brahmanda_prakasa_assist, 4);
+    return round(absorb_value);
 }
 
 void personal_enchantment_maintenance(object owner, object creator, object maintainer) {
@@ -670,11 +674,9 @@ void configure() {
     }));
     set_craft(Craft_Unearthly);
     armour()->set_armour_type(Armour_Type_Aura);
-    armour()->set_field_effect(True);
     armour()->set_ablative(False);
     armour()->set_race("human");
     personal_enchantment_set_maintenance_interval(Time_Minute);
-    personal_enchantment_set_unbound_armour(True);
     personal_enchantment_set_mod_description(([
         Description_Type                        : Description_Type_Simple,
         Description_Content                     : ({

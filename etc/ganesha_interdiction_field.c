@@ -3,8 +3,8 @@
 
 inherit "/std/item";
 
-internal object array hooked = ({});
-internal mapping mods = ([]);
+nosave private object array hooked = ({});
+nosave private mapping mods = ([]);
 private string array realms;
 
 void ganesha_interdiction_field_do_move(mapping args);

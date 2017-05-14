@@ -58,8 +58,8 @@ void unregister_taboo(object def);
 
 void preinit() {
     ::preinit();
-    creator_benefits = Persistence(Persistence_Tag("creator_benefits"), (: ([]) :));
-    requirement_suspensions = Persistence(Persistence_Tag("requirement_suspensions"), (: ([]) :));
+    creator_benefits = Persistence_Map(Persistence_Tag("creator_benefits"));
+    requirement_suspensions = Persistence_Map(Persistence_Tag("requirement_suspensions"));
     karma_phala_add_display = ([
         Message_Content                     : ({
             0, ({ "sense", 0 }), "Ganesha looking upon", ({ 'o', 0 }), "favorably",
@@ -226,6 +226,8 @@ void register_bestowal(object def) {
     string name = def->query_bestowal_name();
     bestowal_rarities[name] = def->query_bestowal_rarity();
     bestowal_lookup[name] = def;
+    foreach(string alias : def->query_bestowal_aliases())
+        bestowal_lookup[alias] ||= def;
     array_require(&valid_bestowals, def);
     array_require(&bestowal_names, name);
     if(member(valid_bestowals, 0) != Null)
@@ -238,6 +240,9 @@ void unregister_bestowal(object def) {
     string name = def->query_bestowal_name();
     m_delete(bestowal_rarities, name);
     m_delete(bestowal_lookup, name);
+    foreach(string alias : def->query_bestowal_aliases())
+        if(bestowal_lookup[alias] == def)
+            map_delete(bestowal_lookup, alias);
     array_remove(&valid_bestowals, def);
     array_remove(&bestowal_names, name);
     if(member(valid_bestowals, 0) != Null)
@@ -615,10 +620,13 @@ string generate_random_forfeit(object challenge) {
 }
 
 void check_for_challenge_creator_benefits(object who, object link) {
-    string extant = who->require_extant();
-    if(creator_benefits && creator_benefits[extant]) {
-        link->travelers_benefit_challenge_creator(creator_benefits[extant]);
-        m_delete(creator_benefits, extant);
+    if(creator_benefits) {
+        string extant = who->require_extant();
+        mixed benefit = creator_benefits[extant];
+        if(benefit) {
+            link->travelers_benefit_challenge_creator(benefit);
+            m_delete(creator_benefits, extant);
+        }
     }
 }
 

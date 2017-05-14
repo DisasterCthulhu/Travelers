@@ -3,7 +3,7 @@
 
 inherit Travelers_Definition("Bestowal");
 
-internal mixed potions;
+nosave private mixed potions;
 
 mixed bestowal_potions() {
     return bestowal_find_safe_items(Effect_Class_Greater, Item_Category_Comestible | Item_Category_Drink | Item_Category_Magical);

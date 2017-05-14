@@ -11,8 +11,9 @@ private int rarity;
 private int type;
 private int value;
 private mixed array katakacha_damage_types;
-private string array kabatha_resistance_types;
 private status universality;
+private string array aliases = ({});
+private string array kabatha_resistance_types;
 private string array required_bestowals;
 private string description;
 private string name;
@@ -24,63 +25,71 @@ void configure() {
     set_broker(Travelers_Daemon("dharma"));
 }
 
-void set_bestowal_name(string val) {
+protected nomask void set_bestowal_name(string val) {
     name = val;
 }
 
-string query_bestowal_name() {
+nomask string query_bestowal_name() {
     return name;
 }
 
-void set_bestowal_type(int val) {
+protected nomask void set_bestowal_aliases(string array val) {
+    aliases = val;
+}
+
+nomask string array query_bestowal_aliases() {
+    return aliases;
+}
+
+protected nomask void set_bestowal_type(int val) {
     type = val;
 }
 
-int query_bestowal_type() {
+nomask int query_bestowal_type() {
     return type;
 }
 
-void set_bestowal_rarity(int val) {
+protected nomask void set_bestowal_rarity(int val) {
     rarity = val;
 }
 
-int query_bestowal_rarity() {
+nomask int query_bestowal_rarity() {
     return rarity;
 }
 
-void set_bestowal_value(int val) {
+protected nomask void set_bestowal_value(int val) {
     value = val;
 }
 
-int query_bestowal_value() {
+nomask int query_bestowal_value() {
     return value;
 }
 
-void set_bestowal_universality(status val) {
+protected nomask void set_bestowal_universality(status val) {
     universality = val;
 }
 
-status query_bestowal_universality() {
+nomask status query_bestowal_universality() {
     return universality;
 }
 
-void set_bestowal_required_bestowals(string array val) {
+protected nomask void set_bestowal_required_bestowals(string array val) {
     required_bestowals = val;
 }
 
-string array query_bestowal_required_bestowals() {
+nomask string array query_bestowal_required_bestowals() {
     return required_bestowals;
 }
 
-void set_bestowal_eligibility_condition(mixed val) {
+protected nomask void set_bestowal_eligibility_condition(mixed val) {
     eligibility_condition = val && Condition(val);
 }
 
-descriptor query_bestowal_eligibility_condition() {
+nomask descriptor query_bestowal_eligibility_condition() {
     return eligibility_condition;
 }
 
-status query_bestowal_eligibility(object who) {
+nomask status query_bestowal_eligibility(object who) {
     if(!query_bestowal_universality()) {
         object link = who->query_affiliation_link(project_control());
         if(!link)
@@ -102,27 +111,27 @@ status query_bestowal_eligibility(object who) {
     return !cond || Condition_Apply(cond, who, 0);
 }
 
-void set_bestowal_reward_process(closure cl) {
+protected nomask void set_bestowal_reward_process(closure cl) {
     reward_process = cl;
 }
 
-closure query_bestowal_reward_process() {
+nomask closure query_bestowal_reward_process() {
     return reward_process;
 }
 
-void set_bestowal_description(string desc) {
+protected nomask void set_bestowal_description(string desc) {
     description = desc;
 }
 
-string query_bestowal_description() {
+nomask string query_bestowal_description() {
     return description;
 }
 
-void set_bestowal_display(mixed display) {
+protected nomask void set_bestowal_display(mixed display) {
     display = Message(display);
 }
 
-descriptor query_bestowal_display() {
+nomask descriptor query_bestowal_display() {
     if(display)
         return display;
     if(description)
@@ -137,15 +146,15 @@ descriptor query_bestowal_display() {
     return 0;
 }
 
-void set_bestowal_attribute_adjustment(int attr, int amount) {
+protected nomask void set_bestowal_attribute_adjustment(int attr, int amount) {
     attribute_adjustment = ({ attr, amount });
 }
 
-int array query_bestowal_attribute_adjustment() {
+nomask int array query_bestowal_attribute_adjustment() {
     return attribute_adjustment;
 }
 
-void set_bestowal_specialty_access(mixed spec) {
+protected nomask void set_bestowal_specialty_access(mixed spec) {
     descriptor array use;
     if(mappingp(spec))
         use = ({ Specialty(spec) });
@@ -154,19 +163,19 @@ void set_bestowal_specialty_access(mixed spec) {
     specialty_access = use;
 }
 
-descriptor array query_bestowal_specialty_access() {
+nomask descriptor array query_bestowal_specialty_access() {
     return specialty_access;
 }
 
-void set_bestowal_katakacha_damage_types(mixed array types) {
+protected nomask void set_bestowal_katakacha_damage_types(mixed array types) {
     katakacha_damage_types = types;
 }
 
-mixed array query_bestowal_katakacha_damage_types() {
+nomask mixed array query_bestowal_katakacha_damage_types() {
     return katakacha_damage_types;
 }
 
-string array query_bestowal_katakacha_damage_types_and_combos() {
+nomask string array query_bestowal_katakacha_damage_types_and_combos() {
     unless(katakacha_damage_types)
         return 0;
     string array out = ({});
@@ -177,15 +186,15 @@ string array query_bestowal_katakacha_damage_types_and_combos() {
     return sort_array(out, #'>);
 }
 
-void set_bestowal_kabatha_resistances(string array types) {
+protected nomask void set_bestowal_kabatha_resistances(string array types) {
     kabatha_resistance_types = types;
 }
 
-mixed array query_bestowal_kabatha_resistances() {
+nomask mixed array query_bestowal_kabatha_resistances() {
     return kabatha_resistance_types;
 }
 
-void bestowal_bestow(object who) {
+nomask void bestowal_bestow(object who) {
     who->display(query_bestowal_display());
     funcall(reward_process, who);
     object link = who->query_affiliation_link(project_control());
@@ -200,7 +209,7 @@ void bestowal_bestow(object who) {
     }
 }
 
-void bestowal_deliver(object who, mixed what) {
+nomask void bestowal_deliver(object who, mixed what) {
     switch(typeof(what)) {
     case T_OBJECT   :
         break;
@@ -269,7 +278,7 @@ varargs mixed bestowal_find_safe_items(int effect_class, int categories, status 
         return m_indices(out);
 }
 
-float bestowal_query_total_skill_experience(object who) {
+nomask float bestowal_query_total_skill_experience(object who) {
     float total_skill_exp = 0.0;
     int array skills = who->query_skills();
     foreach(int skill : skills)

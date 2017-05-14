@@ -3,7 +3,7 @@
 
 inherit Travelers_Definition("Bestowal");
 
-internal mixed rings;
+nosave private mixed rings;
 
 mixed bestowal_rings() {
     return bestowal_find_safe_items(Effect_Class_Greater, Item_Category_Armour | Item_Category_Hand_Accessory | Item_Category_Magical);

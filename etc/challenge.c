@@ -53,12 +53,12 @@ mixed ganesha_challenge_query_creator() {
 }
 
 void ganesha_challenge_set_creator(mixed who) {
-    if(stringp(who) && Extant_Find(who))
+    if(Extant_Format_Match(who) && Extant_Find(who))
         challenge["creator"] = who;
     else if(objectp(who))
         challenge["creator"] = who->require_extant();
     else
-        error("Was expecting unique tag or object, got '" + who + "'");
+        error("Was expecting extant or object, got '" + who + "'");
 }
 
 status query_auto_keep(object who) {

@@ -55,7 +55,7 @@ void configure() {
             Skill_Invocation,
             Skill_Evocation,
             Skill_Power_Channeling,
-            Skill_Telesma,
+            Skill_Bellerophrasty,
         }),
         Modifier_Amount         : 0.9,
     ]));

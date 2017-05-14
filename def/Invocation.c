@@ -460,7 +460,7 @@ status perform_invocation(mapping args) {
         Process_Continue_Fail_Call          : #'invocation_continue_fail_call,
         Process_Complete_Do_Call            : #'invocation_complete_do_call,
         Process_Interrupts                  : Process_Interrupts_All_Except(Process_Interrupt_Blindness),
-        Process_Interrupts_Resistable       : Process_Interrupt_Combat | Process_Resistable_Interrupts_Sensations | Process_Resistable_Interrupts_Emotions,
+        Process_Interrupts_Resistable       : Process_Interrupt_Combat | Process_Resistable_Interrupts_Sensations | Process_Resistable_Interrupts_Emotions | Process_Interrupt_Repositioning,
         Process_Info                        : ([
             "Ganesha_Invocation_Process"    : True,
             "ability"                       : query_invocation_ability(who),

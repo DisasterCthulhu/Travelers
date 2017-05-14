@@ -245,7 +245,8 @@ protected nomask void obstacle_disengage_skill_modifiers(object who) {
         who->remove_skill_modifier(skill_mod);
 }
 
-protected nomask void recalculate_obstacle_scaled_skill_modifiers(object who) {
+// Must be public, this is called from the GANESHA_CHALLENGE object
+public nomask void recalculate_obstacle_scaled_skill_modifiers(object who) {
     if(!scaled_skill_modifiers)
         return;
     descriptor array mods = find_obstacle_skill_modifiers(who);
@@ -333,7 +334,8 @@ protected nomask void obstacle_disengage_attribute_modifiers(object who) {
         who->remove_attribute_modifier(attribute_mod);
 }
 
-protected nomask void recalculate_obstacle_scaled_attribute_modifiers(object who) {
+// Must be public, this is called from the GANESHA_CHALLENGE object
+public nomask void recalculate_obstacle_scaled_attribute_modifiers(object who) {
     if(!scaled_attribute_modifiers)
         return;
     descriptor array mods = find_obstacle_attribute_modifiers(who);

@@ -4,7 +4,7 @@
 
 inherit Travelers_Definition("Bestowal");
 
-internal mixed potions;
+nosave private mixed potions;
 
 mixed bestowal_potions() {
     mixed out = bestowal_find_safe_items(Effect_Class_Great, Item_Category_Comestible | Item_Category_Drink | Item_Category_Magical);
@@ -14,7 +14,6 @@ mixed bestowal_potions() {
         Catelii_Comestible("powercraft_potion"),
         Catelii_Comestible("spellcraft_potion"),
         Catelii_Comestible("linguistic_cunning_potion"),
-        Catelii_Comestible("revitalization_potion"),
     });
     return out;
 }
