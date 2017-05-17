@@ -118,10 +118,8 @@ void process_post_restore(object who, record save, int restore_flags) {
         foreach(mixed modifier : armour()->query_absorption_modifiers())
             armour()->remove_absorption_modifier(modifier);
     }
-    if(personal_enchantment_query_unbound_armour())
-        personal_enchantment_set_unbound_armour(False);
-    if(armour()->query_field_effect())
-        armour()->set_field_effect(False);
+    personal_enchantment_set_unbound_armour(True);
+    armour()->set_field_effect(True);
 }
 
 descriptor brahmanda_prakasa_query_owner_covering_element() {
@@ -675,8 +673,10 @@ void configure() {
     set_craft(Craft_Unearthly);
     armour()->set_armour_type(Armour_Type_Aura);
     armour()->set_ablative(False);
+    armour()->set_field_effect(True);
     armour()->set_race("human");
     personal_enchantment_set_maintenance_interval(Time_Minute);
+    personal_enchantment_set_unbound_armour(True);
     personal_enchantment_set_mod_description(([
         Description_Type                        : Description_Type_Simple,
         Description_Content                     : ({
