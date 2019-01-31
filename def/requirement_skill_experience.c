@@ -85,7 +85,7 @@ void configure() {
         float exp_needed = 0.0;
         foreach(int skill : who->query_skills())
             exp_needed += who->query_skill_exp(skill);
-        exp_needed = diminishing_returns(exp_needed / 50, 100000);
+        exp_needed = diminishing_returns(exp_needed / 75, 50000);
         $1->set_info("Skill_Experience_Required", exp_needed);
         $1->set_info("Skill_Experience_Gained", 0.0);
         return;

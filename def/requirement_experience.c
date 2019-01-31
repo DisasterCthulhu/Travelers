@@ -46,7 +46,7 @@ void configure() {
     set_requirement_initialize_process((:
         int level = $1->ganesha_challenge_query_owner()->query_level();
         int exp_needed = (Level_Experience(level + 1) - Level_Experience(level)) / 2;
-        exp_needed = round(diminishing_returns(exp_needed, 50000));
+        exp_needed = round(diminishing_returns(exp_needed, 25000));
         $1->set_info("Experience_Required", exp_needed);
         $1->set_info("Experience_Gained", 0);
         return;

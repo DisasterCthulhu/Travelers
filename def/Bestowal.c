@@ -1,6 +1,8 @@
+#include <Travelers.h>
 #include <daemon.h>
 #include <services_master.h>
-#include <Travelers.h>
+
+inherit "/std/definition";
 
 private closure reward_process;
 private descriptor array specialty_access;
@@ -17,8 +19,6 @@ private string array kabatha_resistance_types;
 private string array required_bestowals;
 private string description;
 private string name;
-
-inherit "/std/definition";
 
 void configure() {
     ::configure();

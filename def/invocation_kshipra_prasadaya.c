@@ -17,7 +17,9 @@ void configure() {
         "one in innumerable ways.  The higher one's karma phala, and ability with this invocation, the more effective "
         "its protection will be.  To release the brahmanda-prakasa, repeat the invocation.\n\f"
         "The aura can synchronize with one's chakras, if one has any.  Which chakra it is attuned to will affect its "
-        "protective properties.  To change the chakra it is attuned to, simply tap the desired chakra."
+        "protective properties.  To change the chakra it is attuned to, simply tap the desired chakra.\n\f"
+        "The aura can draw on one's reserves of goetic energy from Ganesha to neutralize damage completely.  One can signal to "
+        "the brahmanda-brakasa to begin or cease doing this by touching one's head."
     );
     set_invocation_cost(({
         ({ Energy_Spiritual, 100 }),

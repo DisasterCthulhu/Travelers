@@ -9,17 +9,12 @@
 
 inherit "/std/app/personal_enchantment";
 
-#define Brahmanda_Prakasa_Base_Resistances        ({\
-    "air",\
-    "earth",\
-    "fire",\
-    "water",\
-    "entropy",\
-    "extropy",\
-})
+#define Brahmanda_Prakasa_Maximum_Shekhinah_Proportion  9.0
+#define Brahmanda_Prakasa_Base_Resistances              ({ "air", "earth", "fire", "water", "entropy", "extropy", })
 
 nosave private descriptor array base_resistances;
 nosave private descriptor array chakra_resistances;
+nosave private descriptor energy_cost_message;
 nosave private descriptor life_support;
 nosave private descriptor light_adjustment;
 nosave private mixed array element_color_result;
@@ -28,23 +23,10 @@ nosave private object owner;
 nosave private object preferred_chakra;
 nosave private status life_saving_subsequent;
 private float charge = 0.0;
-private float absorb_value = 0.0;
+private float power = 0.0;
 private int duration;
+private status goetic_protection;
 private status will_expire;
-
-
-// old resists for backwards documentation - this is what trav aura used to grant
-// --- by Marcosy, 2/9/2015
-//base - 0.83 air, 0.83 entropy, 0.5 fire, 0.5 extropy, 0.33 water, 
-//ajna - 1.0 air, 0.45 extropy, 0.15 water
-//anahata - 0.65 water, 0.65 earth, 0.3 entropy, 0.2 extropy
-//manipura - 0.5 fire, 0.5 air, 0.3 extropy, 0.2 entropy, +tiny bit all
-//muladhara - 0.9 poison, 0.9 disease
-//svadhisthana - 1.0 fire, 0.3 entropy
-//sahasrara - 0.3 air, 0.3 water, 0.7 extropy, 0.4 earth, 0.1 fire  
-//padme - 0.2 air, 0.2 fire, 1.0 water, 0.3 extropy 
-//kalila - 1.0 earth, 0.5 entropy
-
 
 #define Brahmanda_Prakasa_Chakra_Resistances ([\
     "ajna"                                      : ([\
@@ -94,6 +76,12 @@ private status will_expire;
         "entropy"                               : 0.5,\
         "chaos"                                 : 0.4,\
     ]),\
+    "ka"                                        : ([\
+        "time"                                  : 0.7,\
+        "cutting"                               : 0.5,\
+        "piercing"                              : 0.5,\
+        "crushing"                              : 0.5,\
+    ]),\
 ])
 
 #define Brahmanda_Prakasa_Chakra_Colors ([\
@@ -106,6 +94,7 @@ private status will_expire;
     "vishuddha"                                 : "star-filled " + LS_Chakra("vishuddha")->query_chakra_color(),\
     "padme"                                     : "star-filled ocean blue",\
     "kalila"                                    : "star-filled sky blue",\
+    "ka"                                        : "star-filled emerald",\
 ])
 
 status is_brahmanda_prakasa() {
@@ -114,10 +103,11 @@ status is_brahmanda_prakasa() {
 
 void process_post_restore(object who, record save, int restore_flags) {
     ::process_post_restore(who, save, restore_flags);
-    if(sizeof(armour()->query_absorption_modifiers())) {
+    if(find_element(Material_Dweomer))
+        transmute_element(Material_Dweomer, Material_Goetia);
+    if(sizeof(armour()->query_absorption_modifiers()))
         foreach(mixed modifier : armour()->query_absorption_modifiers())
             armour()->remove_absorption_modifier(modifier);
-    }
     personal_enchantment_set_unbound_armour(True);
     armour()->set_field_effect(True);
 }
@@ -139,20 +129,21 @@ string brahmanda_prakasa_query_owner_covering_element_name() {
     return Element_Name(brahmanda_prakasa_query_owner_covering_element());
 }
 
-descriptor brahmanda_prakasa_query_dweomer_element() {
-    return find_element(Material_Dweomer);
+descriptor brahmanda_prakasa_query_goetia_element() {
+    return find_element(Material_Goetia);
 }
 
-string brahmanda_prakasa_query_dweomer_element_color() {
-    return Element_Query(brahmanda_prakasa_query_dweomer_element(), Element_Color);
+string brahmanda_prakasa_query_goetia_element_color() {
+    descriptor dxr = brahmanda_prakasa_query_goetia_element();
+    return dxr ? Element_Query(dxr, Element_Color) : "starry";
 }
 
-varargs string brahmanda_prakasa_color_with_dweomer(string pre, string post) {
-    return self_color(brahmanda_prakasa_query_dweomer_element_color(), pre, post);
+varargs string brahmanda_prakasa_color_with_goetia(string pre, string post) {
+    return self_color(brahmanda_prakasa_query_goetia_element_color(), pre, post);
 }
 
-string brahmanda_prakasa_dweomer_colored_bubbles() {
-    return brahmanda_prakasa_color_with_dweomer(0, "bubbles");
+string brahmanda_prakasa_goetia_colored_bubbles() {
+    return brahmanda_prakasa_color_with_goetia(0, "bubbles");
 }
 
 int brahmanda_prakasa_set_duration(int val) {
@@ -206,14 +197,10 @@ object brahmanda_prakasa_query_preferred_chakra() {
     return preferred_chakra ||= brahmanda_prakasa_find_preferred_chakra();
 }
 
-string brahmanda_prakasa_query_color() {
-    return Element_Query(find_element(Material_Dweomer), Element_Color);
-}
-
 private mixed brahmanda_prakasa_poll_element_color(mixed event) {
     descriptor element = mappingp(event) ? event["element"] : event[Poll_Element_Color_Event_Element];
     if(element == brahmanda_prakasa_query_owner_covering_element())
-        return element_color_result ||= ({ brahmanda_prakasa_query_color(), 5 });
+        return element_color_result ||= ({ brahmanda_prakasa_query_goetia_element_color(), 5 });
     return 0;
 }
 
@@ -224,7 +211,7 @@ varargs void brahmanda_prakasa_activate_passing_effect(object who) {
         return;
     }
     mapping rec = Element_Record(who);
-    string color = brahmanda_prakasa_query_color();
+    string color = brahmanda_prakasa_query_goetia_element_color();
     who->add_hook(Poll_Element_Color, #'brahmanda_prakasa_poll_element_color);
     if(rec)
         Element_Record_Message(who, rec, ({
@@ -243,7 +230,7 @@ varargs void brahmanda_prakasa_deactivate_passing_effect(object who) {
         return;
     }
     mapping rec = Element_Record(who);
-    string color = brahmanda_prakasa_query_color();
+    string color = brahmanda_prakasa_query_goetia_element_color();
     who->remove_hook(Poll_Element_Color, #'brahmanda_prakasa_poll_element_color);
     if(rec)
         Element_Record_Message(who, rec, 0, ({
@@ -256,7 +243,7 @@ varargs void brahmanda_prakasa_deactivate_passing_effect(object who) {
 void brahmanda_prakasa_update_passing_effect(object old_chakra, object new_chakra, string color) {
     object who = personal_enchantment_query_owner();
     mapping rec = Element_Record(who);
-    alter_element(find_element(Material_Dweomer), Element_Color, color);
+    alter_element(find_element(Material_Goetia), Element_Color, color);
     element_color_result = 0;
     mixed array pre_message;
     if(old_chakra && new_chakra)
@@ -332,22 +319,96 @@ mixed personal_enchantment_determine_effectiveness(object who, object target) {
     return who->affiliation_links_reduce((: max($1, $2->query_brahmanda_prakasa_performance_rating()) :));
 }
 
+nomask float query_brahmanda_prakasa_power() {
+    return power;
+}
+
+nomask float calculate_brahmanda_prakasa_raw_power() {
+    object who = personal_enchantment_query_owner();
+    unless(who)
+        return 0;
+    float effective_karma = to_float(Ganesha_Query_Karma_Phala(who));
+    int points = who->query_exploration_points();
+    float universe_exploration_proportion = to_float(points) / Exploration_Point_Total;
+    float universe_exploration_proportion_factor = scale_conversion(universe_exploration_proportion, 0.0, 1.0, 0.2, 1.0);
+    effective_karma *= universe_exploration_proportion_factor;
+    effective_karma *= personal_enchantment_query_effectiveness();
+    return effective_karma;
+}
+
+nomask float calculate_brahmanda_prakasa_power() {
+    float raw_power = calculate_brahmanda_prakasa_raw_power();
+    return diminishing_cap(raw_power * 0.0001, Brahmanda_Prakasa_Maximum_Shekhinah_Proportion);
+}
+
+void brahmanda_prakasa_add_default_elements() {
+    add_proportion(([
+        Element_Type                            : Material_Goetia,
+        Element_Proportion                      : 1.0,
+        Element_Color                           : "starry",
+        Element_Flags                           : Element_Flag_Suppress_Material_Blend | Element_Flag_Suppress_Material_Name | Element_Flag_Provide_Default_Color,
+    ]));
+}
+
 varargs void brahmanda_prakasa_update(status force) {
     object who = personal_enchantment_query_owner();
     unless(who)
         return;
-    float old_eff = !force && personal_enchantment_query_effectiveness();
-    personal_enchantment_refresh_effectiveness();
-    if(old_eff == personal_enchantment_query_effectiveness())
-        return;
-    float effective_karma = to_float(Ganesha_Query_Karma_Phala(who));
-    int points = who->query_exploration_points();
-    float universe_exploration_percentage = to_float(points) / Exploration_Point_Total;
-    float universe_exploration_percentage_factor = scale_conversion(universe_exploration_percentage, 0.0, 1.0, 0.5, 1.0);
-    effective_karma *= universe_exploration_percentage_factor;
-    effective_karma *= personal_enchantment_query_effectiveness();
-    absorb_value = diminishing_returns(effective_karma / 50, 20);
+    if(force) {
+        personal_enchantment_refresh_effectiveness();
+        power = calculate_brahmanda_prakasa_power();
+    } else {
+        float old_eff = personal_enchantment_query_effectiveness();
+        personal_enchantment_refresh_effectiveness();
+        float cur_power = calculate_brahmanda_prakasa_power();
+        if(old_eff == personal_enchantment_query_effectiveness() && cur_power == power)
+            return;
+        power = cur_power;
+    }
+    set_will_update_configuration(True);
+    set_elements(0);
+    /*
+    proportionalize_elements();
+    descriptor empowerment = find_proportion(Element_Key, "Brahmanda_Prakasa_Empowerment");
+    if(empowerment)
+        remove_proportion(empowerment);
+    */
+    brahmanda_prakasa_add_default_elements();
+    if(power > 0) {
+        float total_proportion = 0;
+        foreach(descriptor dxr : query_proportions())
+            total_proportion += Element_Query(dxr, Element_Proportion);
+        if(total_proportion > 0)
+            add_proportion(([
+                Element_Type        : Material_Shekhinah,
+                Element_Proportion  : total_proportion * power,
+            ]));
+    }
+    update_configuration(True);
     brahmanda_prakasa_synchronize_with_chakra();
+}
+
+void brahmanda_prakasa_switch_goetic_protection() {
+    if(!goetic_protection) {
+        goetic_protection = True;
+        user_message(([
+            Message_Content                             : ({
+                0, ({ "begin", 0 }), "to effervesce rhythmically",
+            }),
+            Message_Senses                              : Message_Sense_Visual | Message_Sense_Astral,
+        ]));
+    } else {
+        goetic_protection = False;
+        user_message(([
+            Message_Content                             : ({
+                0, ({ "cease", 0 }), "to effervesce and", ({ "stabilize", 0 }),
+            }),
+            Message_Senses                              : Message_Sense_Visual | Message_Sense_Astral,
+        ]));
+    }
+}
+
+void brahmanda_prakasa_switch_goetic_protection_refraction() {
 }
 
 void brahmanda_prakasa_owner_do_contact(mapping args) {
@@ -358,20 +419,32 @@ void brahmanda_prakasa_owner_do_contact(mapping args) {
     if(!objectp(obj))
         return;
     string verb = args["verb"];
-    unless(verb == "tap")
-        return;
-    unless(obj->is_chakra())
-        return;
-    unless(obj->query_chakra_subject() == who)
-        return;
-    object old_pref = brahmanda_prakasa_query_preferred_chakra();
-    if(old_pref) {
-        old_pref->remove_info("Brahmanda_Prakasa_Preferred_Chakra");
-        preferred_chakra = 0;
+    if(verb == "tap") {
+        unless(obj->is_chakra())
+            return;
+        unless(obj->query_chakra_subject() == who)
+            return;
+        object old_pref = brahmanda_prakasa_query_preferred_chakra();
+        if(old_pref) {
+            old_pref->remove_info("Brahmanda_Prakasa_Preferred_Chakra");
+            preferred_chakra = 0;
+        }
+        obj->set_info("Brahmanda_Prakasa_Preferred_Chakra", True);
+        preferred_chakra = obj;
+        brahmanda_prakasa_synchronize_with_chakra();
+    } else if(verb == "touch") {
+        unless(obj == who)
+            return;
+        int limb = args["contacted_limb"];
+        if(limb == Null)
+            return;
+        unless(who->query_limb_type(limb) == Limb_Type_Head)
+            return;
+        if(find_call_out("brahmanda_prakasa_switch_goetic_protection_refraction") != Null)
+            return;
+        brahmanda_prakasa_switch_goetic_protection();
+        call_out("brahmanda_prakasa_switch_goetic_protection_refraction", 2);
     }
-    obj->set_info("Brahmanda_Prakasa_Preferred_Chakra", True);
-    preferred_chakra = obj;
-    brahmanda_prakasa_synchronize_with_chakra();
 }
 
 void brahmanda_prakasa_life_saving_done() {
@@ -404,7 +477,7 @@ private void brahmanda_prakasa_owner_fail_die(mapping args, descriptor ctx) {
             0, ({ "pulse", 0 }), "violently",
         }),
         Message_Senses                          : Message_Sense_Visual | Message_Sense_Astral,
-        Message_Color                           : brahmanda_prakasa_query_color(),
+        Message_Color                           : brahmanda_prakasa_query_goetia_element_color(),
     ]), who);
     who->message(([
         Message_Content                         : ({
@@ -438,7 +511,7 @@ private void brahmanda_prakasa_owner_fail_die(mapping args, descriptor ctx) {
     object env = environment(who);
     unless(query_any_realm("NT", who)) {
         object room = Random_Location_Safe;
-        string swirl = "in " + a(brahmanda_prakasa_color_with_dweomer("swirl", "bubbles"));
+        string swirl = "in " + a(brahmanda_prakasa_color_with_goetia("swirl", "bubbles"));
         if(environment(who) != room)
             who->move_living(room, swirl, swirl);
     }
@@ -525,65 +598,132 @@ mixed brahmanda_prakasa_assist() {
         brahmanda_prakasa_add_charge(-15.0);
         any = True;
     }
-    if(any)
-        Interval_Set(#'brahmanda_prakasa_assist, 15);
+    return any ? 15 : Interval_Terminate;
+}
+
+descriptor query_brahmanda_prakasa_energy_cost_message() {
+    return energy_cost_message ||=
+        clonep(this_object())
+        ? (blueprint() || load_name())->query_brahmanda_prakasa_energy_cost_message()
+        :
+            Message(([
+                Message_Content                 : ({
+                    0, ({ "feel", 0 }), ({ 'r', 0, this_object() }), "drawing spiritual energy from", ({ 'o', 0 }),
+                    "as", ({ 'p', this_object() }), ({ "charge", this_object() }), ({ 'l', this_object() }),
+                    "from the energies being directed at", ({ 'o', 0 }),
+                }),
+                Message_Senses                  : Message_Sense_Spiritual,
+                Message_Flags                   : Message_Flag_Source_Only | Message_Flag_Filter_To_Alternate,
+                Message_Difficulty              : Message_Difficulty_Hard,
+                Message_Color                   : "status: risk",
+                Message_Categories              : Message_Category_Energy_Maintenance,
+                Message_Alternate               : ([
+                    Message_Content             : ({
+                        Energy(Energy_Spiritual)->query_energy_colored_appearance(), "flows from", 0, "to",
+                        ({ 'r', 0, this_object() }),
+                    }),
+                    Message_Senses              : Message_Sense_Astral,
+                    Message_Difficulty          : Message_Difficulty_Hard,
+                    Message_Flags               : Message_Flag_Exclude_Source,
+                ]),
+            ]))
+    ;
+}
+
+varargs status brahmanda_prakasa_check_goetic_energy(status silent) {
+    object who = personal_enchantment_query_owner();
+    if(who)
+        if(who->query_energy_amount(Energy_Goetic) > 0)
+            return True;
+    unless(silent)
+        who->display(([
+            Message_Content                     : ({
+                0, ({ "sense", 0 }), this_object(), "attempting to draw upon", ({ 'r', 0, "exhausted reserves of goetic energy" }),
+            }),
+            Message_Senses                      : Message_Sense_Spiritual,
+            Message_Color                       : "alert: high",
+        ]));
+    brahmanda_prakasa_switch_goetic_protection();
+    return False;
+}
+
+void brahmanda_prakasa_at_damage_absorbed(mapping args) {
+    if(!goetic_protection)
+        return;
+    descriptor attack = args["attack"];
+    if(Attack_Flag_Check(attack, Attack_Flag_Hypothetical))
+        return;
+    float total = Attack_Total_Damage(attack);
+    object who = Attack_Query(attack, Attack_Target);
+    unless(who && who == personal_enchantment_query_owner())
+        return;
+    if(total <= 10.0)
+        return;
+    unless(brahmanda_prakasa_check_goetic_energy())
+        return;
+    int limbs = sizeof(who->query_specified_limbs_indices(Attack_Query(attack, Attack_Limb)));
+    float goetic_energy = who->query_energy_amount(Energy_Goetic);
+    float efficiency = diminishing_returns(calculate_brahmanda_prakasa_raw_power(), 0.01);
+    float absorb_cost = diminishing_returns(total / efficiency, 20);
+    who->display(([
+        Message_Content                     : ({
+            0, ({ "sense", 0 }), this_object(), "drawing upon", ({ 'r', 0, "reserves of goetic energy" }),
+            "to absorb the attack",
+        }),
+        Message_Senses                      : Message_Sense_Spiritual,
+        Message_Color                       : "status: risk",
+    ]));
+    user_message(([
+        Message_Content                     : ({
+            0, ({ "effervesce", 0 }), "steadily",
+        }),
+        Message_Senses                      : Message_Sense_Astral | Message_Sense_Visual,
+    ]));
+    who->add_energy_amount(Energy_Goetic, -absorb_cost);
+    mixed damage = Attack_Query(attack, Attack_Damage);
+    if(arrayp(damage))
+        Attack_Set(attack, Attack_Damage, allocate(sizeof(damage), 0.0));
     else
-        return Interval_Terminate;
+        Attack_Set(attack, Attack_Damage, 0.0);
 }
 
 int brahmanda_prakasa_mod_absorb_damage(mapping args) {
     object who = args["target"];
     descriptor attack = args["attack"];
-    string array types = Attack_Query(attack, Attack_Damage_Type);
-    float charge_proportion = 0.0;
-    foreach(string type : types) {
-        switch(type) {
-        case "temporal"                         :
-            charge_proportion += 1.00;
-            break;
-        case "heat"                             :
-            charge_proportion += 0.90;
-            break;
-        case "eskara"                           :
-            charge_proportion += 0.80;
-            break;
-        case "light"                            :
-            charge_proportion += 0.70;
-            break;
-        case "force"                            :
-            charge_proportion += 0.40;
-            break;
-        case "divine"                           :
-            charge_proportion += 0.10;
-            break;
-        case "primal"                           :
-            charge_proportion += 0.05;
-            break;
-        }
-    }
-    charge_proportion /= sizeof(types);
+    mixed type = Attack_Query(attack, Attack_Damage_Type);
+    float charge_proportion = 0;
+    if(Damage_Type_Find(type, Damage_Type_Temporal))
+        charge_proportion += 1.0;
+    if(Damage_Type_Find(type, "light"))
+        charge_proportion += 0.70 * sizeof(Damage_Model("light")->query_damage_model_types());
+    else if(Damage_Type_Find(type, "heat"))
+        charge_proportion += 0.90 * sizeof(Damage_Model("heat")->query_damage_model_types());
+    if(Damage_Type_Find(type, "eskara"))
+        charge_proportion += 0.80 * sizeof(Damage_Model("eskara")->query_damage_model_types());
+    if(Damage_Type_Find(type, Damage_Type_Force))
+        charge_proportion += 0.40;
+    if(Damage_Type_Find(type, Damage_Type_Divine))
+        charge_proportion += 0.10;
+    if(Damage_Type_Find(type, Damage_Type_Primal))
+        charge_proportion += 0.05;
+    charge_proportion /= sizeof(type);
+    if(charge_proportion > 1)
+        charge_proportion = 1.0;
     float usable = Attack_Total_Damage(attack) * charge_proportion;
     if(usable > 0) {
         float amount = diminishing_returns(usable, 0.1);
-        if(who->query_spell_points() >= amount) {
-            int detect_rating = who->query_average_effective_skill(({ Skill_Theurgy, Skill_Divination, Skill_Equilibrium }), ({}));
-            if(random(detect_rating) > 400 - amount * 20)
-                who->display(([
-                    Message_Content             : ({
-                        0, ({ "feel", 0 }), ({ 'r', 0, this_object() }), "drawing spiritual energy from", ({ 'o', 0 }),
-                        "as", ({ 'p', this_object() }), ({ "charge", this_object() }), ({ 'l', this_object() }),
-                        "from the energies being directed at", ({ 'o', 0 }),
-                    }),
-                    Message_Senses              : Message_Sense_Spiritual,
-                    Message_Color               : "status: risk",
-                ]));
+        if(who->query_real_spell_points() >= amount) {
+            descriptor msg = query_brahmanda_prakasa_energy_cost_message();
+            int diff = max(Message_Difficulty_Hard - round(amount * Message_Difficulty_Adjust_Medium), 0);
+            Message_Set(msg, Message_Difficulty, diff);
+            Message_Set(Message_Query(msg, Message_Alternate), Message_Difficulty, diff);
+            who->message(msg);
             who->add_spell_points(-amount);
             brahmanda_prakasa_add_charge(amount);
         }
     }
-    if(Interval_Query(#'brahmanda_prakasa_assist) == Null)
-        Interval_Set(#'brahmanda_prakasa_assist, 4);
-    return round(absorb_value);
+    Interval_Require(#'brahmanda_prakasa_assist, 4);
+    return 0;
 }
 
 void personal_enchantment_maintenance(object owner, object creator, object maintainer) {
@@ -615,9 +755,12 @@ void personal_enchantment_attach(object who) {
         Modifier_Index                          : Trait_Light_Sensitivity,
         Modifier_Amount                         : -2,
     ]));
+    who->add_hook(At_Damage_Absorbed, #'brahmanda_prakasa_at_damage_absorbed);
+    goetic_protection = True;
 }
 
 void personal_enchantment_detach(object who) {
+    who->remove_hook(At_Damage_Absorbed, #'brahmanda_prakasa_at_damage_absorbed);
     brahmanda_prakasa_deactivate_passing_effect();
     who->remove_trait_modifier(&life_support);
     who->remove_trait_modifier(&light_adjustment);
@@ -633,7 +776,7 @@ void personal_enchantment_detach(object who) {
 }
 
 mixed personal_enchantment_validate(object who, object target) {
-    return !present("BRAHMANDA-PRAKASA", target, target);
+    return !target->query_child_object("is_brahmanda_prakasa");
 }
 
 varargs void personal_enchantment_setup(status temporary) {
@@ -693,7 +836,7 @@ void configure() {
     ]));
     personal_enchantment_set_add_message(([
         Message_Content                         : ({
-            #'brahmanda_prakasa_dweomer_colored_bubbles, "swirl around", "%o", "for a moment and then",
+            #'brahmanda_prakasa_goetia_colored_bubbles, "swirl around", "%o", "for a moment and then",
             "coalesce into", ({ 'a', "%t" })
         }),
         Message_Senses                          : Message_Sense_Astral | Message_Sense_Visual,
@@ -708,7 +851,7 @@ void configure() {
     ]));
     personal_enchantment_set_remove_message(([
         Message_Content                         : ({
-            #'brahmanda_prakasa_dweomer_colored_bubbles, "flow outward from", ({ 's', "%o", "%t" }), "as", ({ 'p', "%t" }),
+            #'brahmanda_prakasa_goetia_colored_bubbles, "flow outward from", ({ 's', "%o", "%t" }), "as", ({ 'p', "%t" }),
             ({ "dissipate", "%t" }), "into the surrounding", Description(Description_Type_Ambient_Medium_Colored_Name)
         }),
         Message_Senses                          : Message_Sense_Astral | Message_Sense_Visual,
@@ -728,11 +871,6 @@ void configure() {
         }),
     }));
     add_hook(Mod_Absorb_Damage, #'brahmanda_prakasa_mod_absorb_damage);
-    add_proportion(([
-        Element_Type                            : Material_Dweomer,
-        Element_Proportion                      : 1.0,
-        Element_Color                           : "starry",
-        Element_Flags                           : Element_Flag_Suppress_Material_Blend | Element_Flag_Suppress_Material_Name | Element_Flag_Provide_Default_Color,
-    ]));
+    brahmanda_prakasa_add_default_elements();    
     set_light(0.5);
 }

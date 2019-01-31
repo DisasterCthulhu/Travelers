@@ -170,7 +170,7 @@ void ganesha_challenge_overcome() {
     if(challenge["forfeit"])
         log_string += "; forfeit " + challenge["forfeit"];
     log_string += "; bestowals: " + implode(rewards, ", ");
-    log_file("dev/twilight.challenges", log_string);
+    log_file(Travelers_Data("challenges.log"), log_string);
     remove();
 }
 
@@ -198,7 +198,7 @@ void ganesha_challenge_yield() {
         log_string += "; taboo " + challenge["taboo"];
     if(challenge["forfeit"])
         log_string += "; forfeit " + challenge["forfeit"];
-    log_file("dev/twilight.challenges", log_string);
+    log_file(Travelers_Data("challenges.log"), log_string);
     remove();
 }
 
@@ -217,7 +217,7 @@ void ganesha_challenge_fail() {
         log_string += "; taboo " + challenge["taboo"];
         if(challenge["forfeit"])
             log_string += "; forfeit " + challenge["forfeit"];
-        log_file("dev/twilight.challenges", log_string);
+        log_file(Travelers_Data("challenges.log"), log_string);
     }
     remove();
 }
@@ -353,7 +353,7 @@ varargs status ganesha_challenge_initialize(object creator, object target, mixed
         log_string += "; taboo: " + tab;
     if(frft)
         log_string += "; forfeit: " + frft;
-    log_file("dev/twilight.challenges", log_string);
+    log_file(Travelers_Data("challenges.log"), log_string);
     return True;
 }
 

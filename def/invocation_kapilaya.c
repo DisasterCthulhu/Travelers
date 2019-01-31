@@ -74,6 +74,11 @@ void configure() {
         object def;
         if(Is_Weapon_Type(arg))
             def = Weapon_Type(arg);
+        if(def && def->query_weapon_type_code() == Weapon_Type_Shard) { // Allow default weapon type regardless of handedness
+            Process_Set(dxr, Process_Target, katakacha);
+            Process_Set_Info(dxr, "weapon type", def);
+            return True;
+        }
         if(!def || (def->query_weapon_type_identity_code() && !who->query_known(def->query_weapon_type_identity_code())))
             return Error(({
                 who, ({ "do", who }), "not know what", ({ 'a', "'" + arg + "'" }), "is"

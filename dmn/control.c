@@ -246,6 +246,8 @@ void configure() {
             Skill_Equilibrium,
             Skill_Combat_Reflexes,
             Skill_Qlippotic_Lore,
+            Skill_Sephirotic_Lore,
+            Skill_Spirit_Lore,
             Skill_Dagger,
             Skill_Gaze_Weapon,
             Skill_Dodge,
@@ -304,6 +306,7 @@ void configure() {
             Skill_Elude_Pursuit,
             Skill_Fishing,
             Skill_Imagination,
+            Skill_Insect_Lore,
             Skill_Law,
             Skill_Lip_Reading,
             Skill_Load_Bearing,
@@ -323,12 +326,12 @@ void configure() {
     add_affiliation_specialty(([
         Specialty_Skills      : ({
             Skill_Armour_Use,
-            Skill_Somatesthesia,
             Skill_Breath_Control,
             Skill_Carousing,
             Skill_Disguise,
             Skill_Eavesdropping,
             Skill_Elder_Lore,
+            Skill_Equipment_Maintenance,
             Skill_Fast_Talk,
             Skill_Finance,
             Skill_Firefighting,
@@ -393,3 +396,4 @@ string travelers_flower_color() {
     flower_color += random_element(Travelers_Rainbow);
     return flower_color;
 }
+

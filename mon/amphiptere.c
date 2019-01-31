@@ -21,7 +21,7 @@ void amphiptere_do_be_mounted(mapping args) {
     unless(who && who->query_affiliation(project_control()))
         return;
     int rider_hyperspatiality = who->query_trait(Trait_Hyperspatiality);
-    if(rider_hyperspatiality) {
+    if(rider_hyperspatiality && rider_hyperspatiality > 0) {
     add_trait_modifier(([
             Modifier_Index                          : Trait_Hyperspatiality,
             Modifier_Amount                         : rider_hyperspatiality,

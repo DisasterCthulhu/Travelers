@@ -10,6 +10,8 @@
 
 inherit "/std/item";
 
+#define Katakacha_Enhancement_Key       "Katakacha_Enhancement_Element"
+
 private string array enhancement;
 
 descriptor katakacha_query_enhancement_identity();
@@ -302,6 +304,9 @@ void katakacha_overwhelm_mortal_wound(object who, object target) {
         Attack_Damage                           : semirandom(5000),
         Attack_Limb                             : Null,
         Attack_Aggressor                        : who,
+        Attack_Damage_Shifts                    : ([
+            Damage_Mode_Agonize                 : -1.0,
+        ]),
         Attack_Flags                            : Attack_Flag_Bypass_Armour | Attack_Flag_Display_Damage_Message | Attack_Flag_Untreatable | Attack_Flag_Limb_Preset | Attack_Flag_Suppress_Attacker_Value,
     ]));
     if(!target->query_dying())
@@ -442,6 +447,7 @@ varargs string katakacha_clear_enhancement(status suppress_message) {
             ]));
         enhancement = 0;
     }
+    remove_elements(find_elements(([ Element_Key : Katakacha_Enhancement_Key ])));
     return out;
 }
 
@@ -482,6 +488,25 @@ void katakacha_set_enhancement(object who, string array types) {
         Message_Senses                          : Message_Sense_Visual | Message_Sense_Astral,
     ]), who);
     int duration = scale_conversion(round(rating), 10, 100, Time_Minute * 15, Time_Hour * 2);
+    // set elements - use Part_Aura
+    set_will_update_configuration(True);
+    object damage_model = Damage_Model_By_Types(types);
+    foreach(int dtype : damage_model->query_damage_model_types()) {
+        object dtype_energy = Damage_Type(dtype)->energy();
+        unless(dtype_energy)
+            continue;
+        int energy_material = dtype_energy->query_energy_mundane_material();
+        unless(energy_material)
+            continue;
+        add_proportion(([
+            Element_Type        : energy_material, 
+            Element_Proportion  : 1.0, 
+            Element_Part        : Part_Aura,
+            Element_Key         : Katakacha_Enhancement_Key, 
+            Element_Flags       : Element_Flag_Secondary | Element_Flag_Suppress_Description, 
+        ]));
+    }
+    update_configuration(True);
     Interval_Set(#'katakacha_clear_enhancement, duration);
 }
 
@@ -705,17 +730,3 @@ status query_auto_keep(object who) {
     return who->query_affiliation(project_control()) || ::query_auto_keep(who);
 }
 
-// hack to ignite webbing when it's got a hot damage type.  ideally this would be modelled by making the motes
-// into an element dxr or dxrs that updated whenever the motes changed based on the damage effect.  but at present,
-// damage effects are not defined as having elements associated with them.
-
-varargs float disabled_query_property_proportion(mixed prop, int flags) {
-    float out = ::query_property_proportion(&prop, flags);
-    if(out < 1.0 && enhancement && sizeof(enhancement & ({ "fire", "heat", "light", "magma" })) && Is_Property(prop)) {
-        if(!intp(prop))
-            prop = Property(prop)->query_property_code();
-        if(prop == Prop_Aflame)
-            out = 1.0;
-    }
-    return out;
-}

@@ -9,13 +9,14 @@ void configure() {
     set_obstacle_rarity(Rarity_Rare);
     set_obstacle_value(Travelers_Obstacle_Value_Low);
     set_challenge_component_selection_adjustments(([
+        "celebration"           : 0.00,
+        "charity"               : 0.50,
         "experience"            : 0.75,
         "exploration"           : 0.50,
+        "neophyte guidance"     : 0.00,
         "pilgrimage"            : 0.50,
         "quest"                 : 1.50,
         "skill experience"      : 2.00,
-        "charity"               : 0.50,
-        "neophyte guidance"     : 0.00,
     ]));
     set_obstacle_initialize_display(([
         Message_Content         : ({

@@ -67,7 +67,7 @@ void configure() {
     set_requirement_overcome_description("provided enough charity");
     set_requirement_initialize_process((:
         int level = $1->ganesha_challenge_query_owner()->query_level();
-        int instances = semirandom(5 + level / 10, 3);
+        int instances = semirandom(round(diminishing_returns(5 + level, 1)));
         $1->set_info("Instances_Required", instances);
         $1->set_info("Instances_Performed", 0);
         $1->set_info("Individuals", ({}));

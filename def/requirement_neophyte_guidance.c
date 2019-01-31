@@ -35,6 +35,11 @@ void configure() {
                 Condition_Info                  : "number of unguided neophytes",
                 Condition_Value                 : 1,
             ]),
+            ([
+                Condition_Type_Code             : Condition_Type_Metric,
+                Condition_Info                  : "availability for neophyte guidance",
+                Condition_Value                 : 1,
+            ]),
         }),
     ]));
     set_requirement_initialize_description("guiding a neophyte in your capacity as a Warden");

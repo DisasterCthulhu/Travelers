@@ -16,12 +16,12 @@ void configure() {
     }));
     set_bestowal_description("the ability to enhance your katakacha with the powers of the moon");
     set_bestowal_katakacha_damage_types(({
-        ({ "extropy", "entropy" }),
-        ({ "extropy", "entropy", "light" }),
-        ({ "order", "extropy", "entropy", "light" }),
-        ({ "air", "entropy", "extropy" }),
-        ({ "earth", "entropy", "extropy" }),
-        ({ "water", "entropy", "extropy" }),
-        ({ "fire", "entropy", "extropy" }),
+        ({ "extropy", "entropy", "spirit" }),
+        ({ "extropy", "entropy", "spirit", "light" }),
+        ({ "order", "extropy", "entropy", "spirit", "light" }),
+        ({ "air", "entropy", "extropy", "spirit" }),
+        ({ "earth", "entropy", "extropy", "spirit" }),
+        ({ "water", "entropy", "extropy", "spirit" }),
+        ({ "fire", "entropy", "extropy", "spirit" }),
     }));
 }
